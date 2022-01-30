@@ -1,0 +1,15 @@
+[package]
+name = "crokey"
+version = "0.1.0"
+authors = ["dystroy <denys.seguret@gmail.com>"]
+edition = "2021"
+keywords = ["key", "parse"]
+license = "MIT"
+categories = ["command-line-interface", "parsing"]
+description = "Parse and describe keys - helping incorporate keybindings in terminal applications"
+repository = "https://github.com/Canop/donkey"
+readme = "README.md"
+rust-version = "1.56"
+
+[dependencies]
+crossterm = "0.22.1"
