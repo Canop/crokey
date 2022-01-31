@@ -145,7 +145,7 @@ pub fn key(input: TokenStream) -> TokenStream {
         "space" => quote! { crossterm::event::KeyCode::Char(' ') },
         "tab" => quote! { crossterm::event::KeyCode::Tab },
         "up" => quote! { crossterm::event::KeyCode::Up },
-        c if c.len() == 1 => {
+        c if c.chars().count() == 1 => {
             let c = c.chars().next().unwrap();
             quote! { crossterm::event::KeyCode::Char(#c) }
         }

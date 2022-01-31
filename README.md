@@ -79,5 +79,3 @@ let format = KeyEventFormat::default()
 assert_eq!(format.to_string(key!(shift-a)), "A");
 assert_eq!(format.to_string(key!(ctrl-c)), "^c");
 ```
-
-Crokey is used in [broot](https://github.com/Canop/broot) and [SafeCloset](https://github.com/Canop/safecloset).
