@@ -4,11 +4,7 @@
 //! - describing key combinations in strings
 
 use {
-    crossterm::event::{
-        KeyCode::*,
-        KeyEvent,
-        KeyModifiers,
-    },
+    crossterm::event::{KeyCode::*, KeyEvent, KeyModifiers},
     std::fmt,
 };
 
@@ -115,9 +111,9 @@ fn check_key_parsing() {
         assert!(parsed.is_ok(), "failed to parse {:?} as key", raw);
         assert_eq!(parsed.unwrap(), key);
     }
-    check_ok("left", LEFT);
-    check_ok("RIGHT", RIGHT);
-    check_ok("Home", HOME);
+    check_ok("left", key!(left));
+    check_ok("RIGHT", key!(right));
+    check_ok("Home", key!(HOME));
     check_ok("f1", KeyEvent::from(F(1)));
     check_ok("F2", KeyEvent::from(F(2)));
     check_ok("Enter", KeyEvent::from(Enter));

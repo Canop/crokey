@@ -4,11 +4,7 @@
 //! - describing key combinations in strings
 
 use {
-    crossterm::event::{
-        KeyCode::*,
-        KeyEvent,
-        KeyModifiers,
-    },
+    crossterm::event::{KeyCode::*, KeyEvent, KeyModifiers},
     std::fmt,
 };
 
@@ -24,26 +20,22 @@ use {
 ///     },
 /// };
 ///
-/// let shift_a = KeyEvent::new(KeyCode::Char('a'), KeyModifiers::SHIFT);
-/// let ctrl_c = KeyEvent::new(KeyCode::Char('c'), KeyModifiers::CONTROL);
-///
-/// // The default format
 /// let format = KeyEventFormat::default();
-/// assert_eq!(format.to_string(shift_a), "Shift-a");
-/// assert_eq!(format.to_string(ctrl_c), "Ctrl-c");
+/// assert_eq!(format.to_string(key!(shift-a)), "Shift-a");
+/// assert_eq!(format.to_string(key!(ctrl-c)), "Ctrl-c");
 ///
 /// // A more compact format
 /// let format = KeyEventFormat::default()
 ///     .with_implicit_shift()
 ///     .with_control("^");
-/// assert_eq!(format.to_string(shift_a), "A");
-/// assert_eq!(format.to_string(ctrl_c), "^c");
+/// assert_eq!(format.to_string(key!(shift-a)), "A");
+/// assert_eq!(format.to_string(key!(ctrl-c)), "^c");
 ///
 /// // A long format with lowercased modifiers
 /// let format = KeyEventFormat::default()
 ///     .with_lowercase_modifiers();
-/// assert_eq!(format.to_string(CTRL_ENTER), "ctrl-Enter");
-/// assert_eq!(format.to_string(HOME), "Home");
+/// assert_eq!(format.to_string(key!(ctrl-enter)), "ctrl-Enter");
+/// assert_eq!(format.to_string(key!(home)), "Home");
 /// assert_eq!(
 ///     format.to_string(
 ///         KeyEvent::new(
@@ -104,16 +96,16 @@ impl KeyEventFormat {
     /// ```
     /// use crokey::*;
     /// let format = KeyEventFormat::default();
-    /// let k = format.format(F6);
+    /// let k = format.format(key!(f6));
     /// let s = format!("k={}", k);
     /// assert_eq!(s, "k=F6");
     /// ```
     pub fn format(&self, key: KeyEvent) -> FormattedKeyEvent {
-        FormattedKeyEvent {
-            format: self,
-            key,
-        }
+        FormattedKeyEvent { format: self, key }
     }
+    /// return the key formatted into a string
+    ///
+    /// `format.to_string(key)` is equivalent to `format.format(key).to_string()`.
     pub fn to_string(&self, key: KeyEvent) -> String {
         self.format(key).to_string()
     }
@@ -157,4 +149,3 @@ impl<'s> fmt::Display for FormattedKeyEvent<'s> {
         Ok(())
     }
 }
-

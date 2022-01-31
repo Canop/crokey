@@ -1,6 +1,6 @@
 [package]
 name = "crokey"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["dystroy <denys.seguret@gmail.com>"]
 edition = "2021"
 keywords = ["key", "parse"]
@@ -13,3 +13,4 @@ rust-version = "1.56"
 
 [dependencies]
 crossterm = "0.22.1"
+crokey-proc_macros = { path = "src/proc_macros", version = "0.2.0" }

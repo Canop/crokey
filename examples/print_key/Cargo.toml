@@ -1,0 +1,12 @@
+[package]
+name = "print_key"
+version = "0.1.0"
+authors = ["dystroy <denys.seguret@gmail.com>"]
+edition = "2021"
+description = "An example of using crokey to print the keys the user types"
+license = "MIT"
+readme = "README.md"
+
+[dependencies]
+crokey = { path = "../.." }
+crossterm = "0.22.1"
