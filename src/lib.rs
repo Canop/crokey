@@ -4,7 +4,7 @@
 //! - describing key combinations in strings
 //! - parsing key combinations at compile time
 //!
-//! ## Parsing a string
+//! ## Parse a string
 //!
 //! Those strings are usually provided by a configuration file.
 //!
@@ -48,11 +48,9 @@
 //! }
 //! # }
 //! ```
-//! Complete example in `/examples/print_key`:
+//! Complete example in `/examples/print_key`
 //!
-//! ![print_key](https://raw.githubusercontent.com/Canop/crokey/main/doc/print_key.png)
-//!
-//! ## Displaying a string with a configurable format
+//! ## Display a string with a configurable format
 //!
 //! ```
 //! use crokey::*;
