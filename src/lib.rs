@@ -50,7 +50,7 @@
 //! ```
 //! Complete example in `/examples/print_key`:
 //!
-//! ![print_key](https://github.com/Canop/crokey/doc/print_key.png)
+//! ![print_key](https://raw.githubusercontent.com/Canop/crokey/main/doc/print_key.png)
 //!
 //! ## Displaying a string with a configurable format
 //!
