@@ -113,7 +113,7 @@ fn check_key_parsing() {
     }
     check_ok("left", key!(left));
     check_ok("RIGHT", key!(right));
-    check_ok("Home", key!(HOME));
+    check_ok("Home", key!(home));
     check_ok("f1", KeyEvent::from(F(1)));
     check_ok("F2", KeyEvent::from(F(2)));
     check_ok("Enter", KeyEvent::from(Enter));

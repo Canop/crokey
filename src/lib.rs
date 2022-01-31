@@ -20,7 +20,7 @@
 //! );
 //! ```
 //!
-//! ## Use key event "literals" thanks to procedural macros
+//! ## Use key event "literals"
 //!
 //! Those key events are parsed at compile time and have zero runtime cost.
 //!
@@ -68,15 +68,13 @@
 //! assert_eq!(format.to_string(key!(shift-a)), "A");
 //! assert_eq!(format.to_string(key!(ctrl-c)), "^c");
 //! ```
+#![allow(uncommon_codepoints)] // See key_code in macros.rs
 
 mod format;
+mod macros;
 mod parse;
 
-pub use {
-    crokey_proc_macros::*,
-    format::*,
-    parse::*,
-};
+pub use {format::*, macros::*, parse::*};
 
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
