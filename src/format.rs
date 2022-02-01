@@ -45,6 +45,7 @@ use {
 ///     ),
 ///     "alt-F6",
 /// );
+///
 /// ```
 #[derive(Debug, Clone)]
 pub struct KeyEventFormat {
@@ -130,6 +131,9 @@ impl<'s> fmt::Display for FormattedKeyEvent<'s> {
             write!(f, "{}", format.shift)?;
         }
         match key.code {
+            Char(' ') => {
+                write!(f, "Space")?;
+            }
             Char('\r') | Char('\n') | Enter => {
                 write!(f, "{}", format.enter)?;
             }
