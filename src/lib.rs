@@ -72,11 +72,7 @@
 mod format;
 mod parse;
 
-pub use {
-    crokey_proc_macros::*,
-    format::*,
-    parse::*,
-};
+pub use {crokey_proc_macros::*, format::*, parse::*};
 
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
@@ -88,5 +84,41 @@ pub const fn as_letter(key: KeyEvent) -> Option<char> {
             modifiers: KeyModifiers::NONE,
         } => Some(l),
         _ => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use {
+        crokey_proc_macros::key,
+        crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
+    };
+
+    fn no_mod(code: KeyCode) -> KeyEvent {
+        KeyEvent::new(code, KeyModifiers::NONE)
+    }
+
+    #[test]
+    fn key() {
+        assert_eq!(key!(backspace), no_mod(KeyCode::Backspace));
+        assert_eq!(key!(bAcKsPaCe), no_mod(KeyCode::Backspace));
+        assert_eq!(key!('x'), no_mod(KeyCode::Char('x')));
+        assert_eq!(key!('X'), no_mod(KeyCode::Char('x')));
+        assert_eq!(key!(']'), no_mod(KeyCode::Char(']')));
+        assert_eq!(key!('ඞ'), no_mod(KeyCode::Char('ඞ')));
+        assert_eq!(key!(f), no_mod(KeyCode::Char('f')));
+        assert_eq!(key!(F), no_mod(KeyCode::Char('f')));
+        assert_eq!(key!(ඞ), no_mod(KeyCode::Char('ඞ')));
+        assert_eq!(key!(f10), no_mod(KeyCode::F(10)));
+        assert_eq!(key!(F10), no_mod(KeyCode::F(10)));
+        assert_eq!(
+            key!(ctrl - c),
+            KeyEvent::new(KeyCode::Char('c'), KeyModifiers::CONTROL)
+        );
+        assert_eq!(
+            key!(alt - shift - c),
+            KeyEvent::new(KeyCode::Char('c'), KeyModifiers::ALT | KeyModifiers::SHIFT)
+        );
+        assert_eq!(key!(shift - alt - '2'), key!(alt - shift - '2'));
     }
 }

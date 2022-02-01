@@ -21,16 +21,16 @@ impl Parse for KeyEventDef {
         let mut ctrl = false;
         let mut alt = false;
         let mut shift = false;
-        fn set<S:Into<String>>(code: &mut Option<String>, c: S) {
+        fn set(code: &mut Option<String>, c: String) {
             if let Some(old_code) = &code {
                 // if that wasn't the last one, then it was a modifier
                 panic!("Unrecognized key modifier: {:?}", old_code);
             }
-            *code = Some(c.into());
+            *code = Some(c);
         }
         loop {
             if let Ok(c) = input.parse::<LitChar>() {
-                set(&mut code, c.value());
+                set(&mut code, c.value().to_lowercase().collect());
                 break;
             }
             // // unclear why a single digit isn't recognized here
