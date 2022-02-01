@@ -6,7 +6,7 @@ use {
         parse_macro_input,
         Ident, LitChar, Token,
     },
-    proc_macro2::{TokenStream, Group},
+    proc_macro2::{TokenStream, Group, Span},
 };
 
 struct KeyEventDef {
@@ -78,28 +78,19 @@ pub fn key(input: TokenStream1) -> TokenStream1 {
     let key_def = parse_macro_input!(input as KeyEventDef);
 
     let crate_path = key_def.crate_path;
-    let crossterm = quote!(#crate_path::__private::crossterm);
 
-    let modifiers = match (key_def.ctrl, key_def.alt, key_def.shift) {
-        (false, false, false) => quote! { #crossterm::event::KeyModifiers::NONE },
-        (true, false, false) => quote! { #crossterm::event::KeyModifiers::CONTROL },
-        (true, true, false) => quote! {
-            #crossterm::event::KeyModifiers::CONTROL | #crossterm::event::KeyModifiers::ALT
-        },
-        (true, false, true) => quote! {
-            #crossterm::event::KeyModifiers::CONTROL | #crossterm::event::KeyModifiers::SHIFT
-        },
-        (true, true, true) => quote! {
-            #crossterm::event::KeyModifiers::CONTROL
-                | #crossterm::event::KeyModifiers::ALT
-                | #crossterm::event::KeyModifiers::SHIFT
-        },
-        (false, true, false) => quote! { #crossterm::event::KeyModifiers::ALT },
-        (false, true, true) => quote! {
-            #crossterm::event::KeyModifiers::ALT | #crossterm::event::KeyModifiers::SHIFT
-        },
-        (false, false, true) => quote! { #crossterm::event::KeyModifiers::SHIFT },
-    };
+    let mut modifier_constant = "MODS".to_owned();
+    if key_def.ctrl {
+        modifier_constant.push_str("_CTRL");
+    }
+    if key_def.alt {
+        modifier_constant.push_str("_ALT");
+    }
+    if key_def.shift {
+        modifier_constant.push_str("_SHIFT");
+    }
+    let modifier_constant = Ident::new(&modifier_constant, Span::call_site());
+
     let code = match key_def.code.as_ref() {
         "backspace" => quote! { Backspace },
         "backtab" => quote! { BackTab },
@@ -140,9 +131,9 @@ pub fn key(input: TokenStream1) -> TokenStream1 {
         }
     };
     quote! {
-        #crossterm::event::KeyEvent {
-            modifiers: #modifiers,
-            code: #crossterm::event::KeyCode::#code,
+        #crate_path::__private::crossterm::event::KeyEvent {
+            modifiers: #crate_path::__private::#modifier_constant,
+            code: #crate_path::__private::crossterm::event::KeyCode::#code,
         }
     }.into()
 }
