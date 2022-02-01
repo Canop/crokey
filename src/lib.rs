@@ -87,10 +87,49 @@ pub const fn as_letter(key: KeyEvent) -> Option<char> {
     }
 }
 
+/// check and expand at compile-time the provided expression
+/// into a valid KeyEvent.
+///
+///
+/// For example:
+/// ```
+/// # use crokey::key;
+/// let key_event = key!(ctrl-c);
+/// ```
+/// is expanded into:
+///
+/// ```
+/// let key_event = crossterm::event::KeyEvent {
+///     modifiers: crossterm::event::KeyModifiers::CONTROL,
+///     code: crossterm::event::KeyCode::Char('\u{63}'),
+/// };
+/// ```
+///
+/// Keys which can't be valid identifiers in Rust must be put between simple quotes:
+/// ```
+/// # use crokey::key;
+/// let ke = key!(shift-'?');
+/// let ke = key!('5');
+/// let ke = key!(alt-']');
+/// ```
+#[macro_export]
+macro_rules! key {
+    ($($tt:tt)*) => {
+        $crate::__private::key!(($crate) $($tt)*)
+    };
+}
+
+// Not public API. This is internal and to be used only by `key!`.
+#[doc(hidden)]
+pub mod __private {
+    pub use crokey_proc_macros::key;
+    pub use crossterm;
+}
+
 #[cfg(test)]
 mod tests {
     use {
-        crokey_proc_macros::key,
+        crate::key,
         crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
     };
 
