@@ -2,9 +2,8 @@ use {
     proc_macro::TokenStream,
     quote::quote,
     syn::{
-        parse::{Parse, ParseStream, Result},
-        parse_macro_input,
-        Ident, LitChar, Token,
+        parse::{Error, Parse, ParseStream, Result},
+        parse_macro_input, Ident, LitChar, LitInt, Token,
     },
 };
 
@@ -17,51 +16,56 @@ struct KeyEventDef {
 
 impl Parse for KeyEventDef {
     fn parse(input: ParseStream<'_>) -> Result<Self> {
-        let mut code: Option<String> = None;
         let mut ctrl = false;
         let mut alt = false;
         let mut shift = false;
-        fn set(code: &mut Option<String>, c: String) {
-            if let Some(old_code) = &code {
-                // if that wasn't the last one, then it was a modifier
-                panic!("Unrecognized key modifier: {:?}", old_code);
+
+        let code = loop {
+            let lookahead = input.lookahead1();
+
+            if lookahead.peek(LitChar) {
+                break input.parse::<LitChar>()?.value().to_lowercase().collect();
             }
-            *code = Some(c);
-        }
-        loop {
-            if let Ok(c) = input.parse::<LitChar>() {
-                set(&mut code, c.value().to_lowercase().collect());
-                break;
-            }
-            // // unclear why a single digit isn't recognized here
-            // if let Ok(d) = input.parse::<syn::LitInt>() {
-            //     let d = d.base10_digits();
-            //     if d.len() > 1 {
-            //         panic!("Not a valid key: {:?}", d);
-            //     }
-            //     set(&mut code, d);
-            //     break;
-            // }
-            if let Ok(ident) = input.parse::<Ident>() {
-                let ident = ident.to_string().to_lowercase();
-                match ident.as_ref() {
-                    "ctrl" => { ctrl = true; }
-                    "alt" => { alt = true; }
-                    "shift" => { shift = true; }
-                    _ => {
-                        set(&mut code, ident);
-                    }
+
+            if lookahead.peek(LitInt) {
+                let int = input.parse::<LitInt>()?;
+                let digits = int.base10_digits();
+                if digits.len() > 1 {
+                    return Err(Error::new(
+                        int.span(),
+                        "invalid key; must be between 0-9",
+                    ));
                 }
-                let _ = input.parse::<Token! [-]>(); // separator ignored
-            } else {
-                break;
+                break digits.to_owned();
             }
-        }
+
+            if !lookahead.peek(Ident) {
+                return Err(lookahead.error());
+            }
+
+            let ident = input.parse::<Ident>()?;
+            let ident_value = ident.to_string().to_lowercase();
+            let modifier = match &*ident_value {
+                "ctrl" => &mut ctrl,
+                "alt" => &mut alt,
+                "shift" => &mut shift,
+                _ => break ident_value,
+            };
+            if *modifier {
+                return Err(Error::new(
+                    ident.span(),
+                    format_args!("duplicate modifier {}", ident_value),
+                ));
+            }
+            *modifier = true;
+
+            input.parse::<Token![-]>()?;
+        };
         Ok(KeyEventDef {
             ctrl,
             alt,
             shift,
-            code: code.expect("key code must be provided"),
+            code,
         })
     }
 }
@@ -84,11 +88,10 @@ impl Parse for KeyEventDef {
 /// };
 /// ```
 ///
-/// Keys which can't be valid identifiers in Rust must be put between simple quotes:
+/// Keys which can't be valid identifiers or single numbers in Rust must be put between simple quotes:
 /// ```
 /// # use crokey_proc_macros::key;
 /// let ke = key!(shift-'?');
-/// let ke = key!('5');
 /// let ke = key!(alt-']');
 /// ```
 #[proc_macro]
@@ -158,7 +161,6 @@ pub fn key(input: TokenStream) -> TokenStream {
             modifiers: #modifiers,
             code: #code,
         }
-    }.into()
+    }
+    .into()
 }
-
-

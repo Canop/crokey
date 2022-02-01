@@ -102,6 +102,8 @@ mod tests {
     fn key() {
         assert_eq!(key!(backspace), no_mod(KeyCode::Backspace));
         assert_eq!(key!(bAcKsPaCe), no_mod(KeyCode::Backspace));
+        assert_eq!(key!(0), no_mod(KeyCode::Char('0')));
+        assert_eq!(key!(9), no_mod(KeyCode::Char('9')));
         assert_eq!(key!('x'), no_mod(KeyCode::Char('x')));
         assert_eq!(key!('X'), no_mod(KeyCode::Char('x')));
         assert_eq!(key!(']'), no_mod(KeyCode::Char(']')));
@@ -119,6 +121,6 @@ mod tests {
             key!(alt - shift - c),
             KeyEvent::new(KeyCode::Char('c'), KeyModifiers::ALT | KeyModifiers::SHIFT)
         );
-        assert_eq!(key!(shift - alt - '2'), key!(alt - shift - '2'));
+        assert_eq!(key!(shift - alt - '2'), key!(ALT - SHIFT - 2));
     }
 }
