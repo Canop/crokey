@@ -1,6 +1,6 @@
 [package]
 name = "crokey-proc_macros"
-version = "0.2.0"
+version = "0.2.2"
 authors = ["Canop <cano.petrole@gmail.com>"]
 description = "proc macros for the crokey crate"
 license = "MIT"
