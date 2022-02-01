@@ -21,11 +21,13 @@ impl Parse for KeyEventDef {
         let mut shift = false;
 
         let code = loop {
-            if input.peek(LitChar) {
+            let lookahead = input.lookahead1();
+
+            if lookahead.peek(LitChar) {
                 break input.parse::<LitChar>()?.value().to_lowercase().collect();
             }
 
-            if input.peek(LitInt) {
+            if lookahead.peek(LitInt) {
                 let int = input.parse::<LitInt>()?;
                 let digits = int.base10_digits();
                 if digits.len() > 1 {
@@ -35,6 +37,10 @@ impl Parse for KeyEventDef {
                     ));
                 }
                 break digits.to_owned();
+            }
+
+            if !lookahead.peek(Ident) {
+                return Err(lookahead.error());
             }
 
             let ident = input.parse::<Ident>()?;
