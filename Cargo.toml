@@ -7,7 +7,7 @@ keywords = ["key", "parse"]
 license = "MIT"
 categories = ["command-line-interface", "parsing"]
 description = "Parse and describe keys - helping incorporate keybindings in terminal applications"
-repository = "https://github.com/Canop/donkey"
+repository = "https://github.com/Canop/crokey"
 readme = "README.md"
 rust-version = "1.56"
 
