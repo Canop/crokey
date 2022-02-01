@@ -94,6 +94,17 @@ mod tests {
         crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
     };
 
+    const _: () = {
+        key!(x);
+        key!(ctrl-'{');
+        key!(alt-'{');
+        key!(shift-'{');
+        key!(ctrl-alt-f10);
+        key!(alt-shift-f10);
+        key!(ctrl-shift-f10);
+        key!(ctrl-alt-shift-enter);
+    };
+
     fn no_mod(code: KeyCode) -> KeyEvent {
         KeyEvent::new(code, KeyModifiers::NONE)
     }

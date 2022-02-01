@@ -98,19 +98,19 @@ pub fn key(input: TokenStream) -> TokenStream {
         (false, false, false) => quote! { crossterm::event::KeyModifiers::NONE },
         (true, false, false) => quote! { crossterm::event::KeyModifiers::CONTROL },
         (true, true, false) => quote! {
-            crossterm::event::KeyModifiers::CONTROL | crossterm::event::KeyModifiers::ALT
+            crossterm::event::KeyModifiers::CONTROL.union(crossterm::event::KeyModifiers::ALT)
         },
         (true, false, true) => quote! {
-            crossterm::event::KeyModifiers::CONTROL | crossterm::event::KeyModifiers::SHIFT
+            crossterm::event::KeyModifiers::CONTROL.union(crossterm::event::KeyModifiers::SHIFT)
         },
         (true, true, true) => quote! {
             crossterm::event::KeyModifiers::CONTROL
-                | crossterm::event::KeyModifiers::ALT
-                | crossterm::event::KeyModifiers::SHIFT
+                .union(crossterm::event::KeyModifiers::ALT)
+                .union(crossterm::event::KeyModifiers::SHIFT)
         },
         (false, true, false) => quote! { crossterm::event::KeyModifiers::ALT },
         (false, true, true) => quote! {
-            crossterm::event::KeyModifiers::ALT | crossterm::event::KeyModifiers::SHIFT
+            crossterm::event::KeyModifiers::ALT.union(crossterm::event::KeyModifiers::SHIFT)
         },
         (false, false, true) => quote! { crossterm::event::KeyModifiers::SHIFT },
     };
