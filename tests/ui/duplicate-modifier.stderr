@@ -1,0 +1,23 @@
+error: duplicate modifier ctrl
+ --> tests/ui/duplicate-modifier.rs:2:23
+  |
+2 |     crokey::key!(ctrl-ctrl-5);
+  |                       ^^^^
+
+error: duplicate modifier alt
+ --> tests/ui/duplicate-modifier.rs:3:22
+  |
+3 |     crokey::key!(alt-alt-5);
+  |                      ^^^
+
+error: duplicate modifier shift
+ --> tests/ui/duplicate-modifier.rs:4:24
+  |
+4 |     crokey::key!(shift-shift-5);
+  |                        ^^^^^
+
+error: duplicate modifier shift
+ --> tests/ui/duplicate-modifier.rs:5:28
+  |
+5 |     crokey::key!(shift-alt-shift-ctrl-5);
+  |                            ^^^^^

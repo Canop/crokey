@@ -209,4 +209,9 @@ mod tests {
         assert!(!matches!(key!(ctrl-alt-b), key!(alt-b)));
         assert!(!matches!(key!(ctrl-alt-b), key!(ctrl-b)));
     }
+
+    #[test]
+    fn ui() {
+        trybuild::TestCases::new().compile_fail("tests/ui/*.rs");
+    }
 }

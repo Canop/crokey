@@ -1,0 +1,23 @@
+error: unexpected end of input, expected one of: character literal, integer literal, identifier
+ --> tests/ui/unexpected-eof.rs:2:5
+  |
+2 |     crokey::key!();
+  |     ^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `$crate::__private::key` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: expected `-`
+ --> tests/ui/unexpected-eof.rs:3:5
+  |
+3 |     crokey::key!(ctrl);
+  |     ^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `$crate::__private::key` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: unexpected end of input, expected one of: character literal, integer literal, identifier
+ --> tests/ui/unexpected-eof.rs:4:5
+  |
+4 |     crokey::key!(ctrl-);
+  |     ^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `$crate::__private::key` (in Nightly builds, run with -Z macro-backtrace for more info)

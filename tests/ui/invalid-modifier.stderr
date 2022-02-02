@@ -1,0 +1,5 @@
+error: invalid modifier "control"; expected `ctrl`, `alt`, or `shift`
+ --> tests/ui/invalid-modifier.rs:2:18
+  |
+2 |     crokey::key!(control-c);
+  |                  ^^^^^^^

@@ -1,0 +1,17 @@
+error: invalid key; must be between 0-9
+ --> tests/ui/invalid-key.rs:2:18
+  |
+2 |     crokey::key!(10);
+  |                  ^^
+
+error: unrecognized key code "backpace"
+ --> tests/ui/invalid-key.rs:3:23
+  |
+3 |     crokey::key!(ctrl-backpace);
+  |                       ^^^^^^^^
+
+error: expected one of: character literal, integer literal, identifier
+ --> tests/ui/invalid-key.rs:4:23
+  |
+4 |     crokey::key!(ctrl--);
+  |                       ^
