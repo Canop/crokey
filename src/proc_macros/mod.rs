@@ -1,11 +1,11 @@
 use {
     proc_macro::TokenStream as TokenStream1,
+    proc_macro2::{Group, Span, TokenStream},
     quote::quote,
     syn::{
         parse::{Error, Parse, ParseStream, Result},
         parse_macro_input, Ident, LitChar, LitInt, Token,
     },
-    proc_macro2::{TokenStream, Group, Span},
 };
 
 struct KeyEventDef {
@@ -13,7 +13,7 @@ struct KeyEventDef {
     pub ctrl: bool,
     pub alt: bool,
     pub shift: bool,
-    pub code: String,
+    pub code: TokenStream,
 }
 
 impl Parse for KeyEventDef {
@@ -24,23 +24,21 @@ impl Parse for KeyEventDef {
         let mut alt = false;
         let mut shift = false;
 
-        let code = loop {
+        let (code, code_span) = loop {
             let lookahead = input.lookahead1();
 
             if lookahead.peek(LitChar) {
-                break input.parse::<LitChar>()?.value().to_lowercase().collect();
+                let lit = input.parse::<LitChar>()?;
+                break (lit.value().to_lowercase().collect(), lit.span());
             }
 
             if lookahead.peek(LitInt) {
                 let int = input.parse::<LitInt>()?;
                 let digits = int.base10_digits();
                 if digits.len() > 1 {
-                    return Err(Error::new(
-                        int.span(),
-                        "invalid key; must be between 0-9",
-                    ));
+                    return Err(Error::new(int.span(), "invalid key; must be between 0-9"));
                 }
-                break digits.to_owned();
+                break (digits.to_owned(), int.span());
             }
 
             if !lookahead.peek(Ident) {
@@ -53,7 +51,7 @@ impl Parse for KeyEventDef {
                 "ctrl" => &mut ctrl,
                 "alt" => &mut alt,
                 "shift" => &mut shift,
-                _ => break ident_value,
+                _ => break (ident_value, ident.span()),
             };
             if *modifier {
                 return Err(Error::new(
@@ -65,6 +63,50 @@ impl Parse for KeyEventDef {
 
             input.parse::<Token![-]>()?;
         };
+
+        let code = match code.as_ref() {
+            "backspace" => quote! { Backspace },
+            "backtab" => quote! { BackTab },
+            "del" => quote! { Delete },
+            "delete" => quote! { Delete },
+            "down" => quote! { Down },
+            "end" => quote! { End },
+            "enter" => quote! { Enter },
+            "esc" => quote! { Esc },
+            "f1" => quote! { F(1) },
+            "f2" => quote! { F(2) },
+            "f3" => quote! { F(3) },
+            "f4" => quote! { F(4) },
+            "f5" => quote! { F(5) },
+            "f6" => quote! { F(6) },
+            "f7" => quote! { F(7) },
+            "f8" => quote! { F(8) },
+            "f9" => quote! { F(9) },
+            "f10" => quote! { F(10) },
+            "f11" => quote! { F(11) },
+            "f12" => quote! { F(12) },
+            "home" => quote! { Home },
+            "ins" => quote! { Insert },
+            "insert" => quote! { Insert },
+            "left" => quote! { Left },
+            "pagedown" => quote! { PageDown },
+            "pageup" => quote! { PageUp },
+            "right" => quote! { Right },
+            "space" => quote! { Char(' ') },
+            "tab" => quote! { Tab },
+            "up" => quote! { Up },
+            c if c.chars().count() == 1 => {
+                let c = c.chars().next().unwrap();
+                quote! { Char(#c) }
+            }
+            _ => {
+                return Err(Error::new(
+                    code_span,
+                    format_args!("unrecognized key code {:?}", code),
+                ))
+            }
+        };
+
         Ok(KeyEventDef {
             crate_path,
             ctrl,
@@ -79,61 +121,26 @@ impl Parse for KeyEventDef {
 #[doc(hidden)]
 #[proc_macro]
 pub fn key(input: TokenStream1) -> TokenStream1 {
-    let key_def = parse_macro_input!(input as KeyEventDef);
-
-    let crate_path = key_def.crate_path;
+    let KeyEventDef {
+        crate_path,
+        ctrl,
+        alt,
+        shift,
+        code,
+    } = parse_macro_input!(input);
 
     let mut modifier_constant = "MODS".to_owned();
-    if key_def.ctrl {
+    if ctrl {
         modifier_constant.push_str("_CTRL");
     }
-    if key_def.alt {
+    if alt {
         modifier_constant.push_str("_ALT");
     }
-    if key_def.shift {
+    if shift {
         modifier_constant.push_str("_SHIFT");
     }
     let modifier_constant = Ident::new(&modifier_constant, Span::call_site());
 
-    let code = match key_def.code.as_ref() {
-        "backspace" => quote! { Backspace },
-        "backtab" => quote! { BackTab },
-        "del" => quote! { Delete },
-        "delete" => quote! { Delete },
-        "down" => quote! { Down },
-        "end" => quote! { End },
-        "enter" => quote! { Enter },
-        "esc" => quote! { Esc },
-        "f1" => quote! { F(1) },
-        "f2" => quote! { F(2) },
-        "f3" => quote! { F(3) },
-        "f4" => quote! { F(4) },
-        "f5" => quote! { F(5) },
-        "f6" => quote! { F(6) },
-        "f7" => quote! { F(7) },
-        "f8" => quote! { F(8) },
-        "f9" => quote! { F(9) },
-        "f10" => quote! { F(10) },
-        "f11" => quote! { F(11) },
-        "f12" => quote! { F(12) },
-        "home" => quote! { Home },
-        "ins" => quote! { Insert },
-        "insert" => quote! { Insert },
-        "left" => quote! { Left },
-        "pagedown" => quote! { PageDown },
-        "pageup" => quote! { PageUp },
-        "right" => quote! { Right },
-        "space" => quote! { Char(' ') },
-        "tab" => quote! { Tab },
-        "up" => quote! { Up },
-        c if c.chars().count() == 1 => {
-            let c = c.chars().next().unwrap();
-            quote! { Char(#c) }
-        }
-        _ => {
-            panic!("Unrecognized key code: {:?}", key_def.code);
-        }
-    };
     quote! {
         #crate_path::__private::crossterm::event::KeyEvent {
             modifiers: #crate_path::__private::#modifier_constant,
