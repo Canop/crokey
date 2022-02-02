@@ -105,7 +105,7 @@ impl Parse for KeyEventDef {
                     return Err(Error::new(
                         code_span,
                         format_args!(
-                            "invalid modifier {:?}; expected `ctrl`, `alt` or `shift`",
+                            "invalid modifier {:?}; expected `ctrl`, `alt`, or `shift`",
                             code
                         ),
                     ));
