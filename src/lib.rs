@@ -96,20 +96,19 @@ pub const fn as_letter(key: KeyEvent) -> Option<char> {
 /// # use crokey::key;
 /// let key_event = key!(ctrl-c);
 /// ```
-/// is expanded into:
+/// is expanded into (roughly):
 ///
 /// ```
 /// let key_event = crossterm::event::KeyEvent {
 ///     modifiers: crossterm::event::KeyModifiers::CONTROL,
-///     code: crossterm::event::KeyCode::Char('\u{63}'),
+///     code: crossterm::event::KeyCode::Char('c'),
 /// };
 /// ```
 ///
-/// Keys which can't be valid identifiers in Rust must be put between simple quotes:
+/// Keys which can't be valid identifiers or digits in Rust must be put between simple quotes:
 /// ```
 /// # use crokey::key;
 /// let ke = key!(shift-'?');
-/// let ke = key!('5');
 /// let ke = key!(alt-']');
 /// ```
 #[macro_export]
