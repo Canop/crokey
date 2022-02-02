@@ -190,5 +190,14 @@ mod tests {
     fn key_pattern() {
         assert!(matches!(key!(ctrl-alt-shift-c), key!(ctrl-alt-shift-c)));
         assert!(!matches!(key!(ctrl-c), key!(ctrl-alt-shift-c)));
+        assert!(matches!(key!(ctrl-alt-b), key!(ctrl-alt-b)));
+        assert!(matches!(key!(ctrl-b), key!(ctrl-b)));
+        assert!(matches!(key!(alt-b), key!(alt-b)));
+        assert!(!matches!(key!(ctrl-b), key!(alt-b)));
+        assert!(!matches!(key!(alt-b), key!(ctrl-b)));
+        assert!(!matches!(key!(alt-b), key!(ctrl-alt-b)));
+        assert!(!matches!(key!(ctrl-b), key!(ctrl-alt-b)));
+        assert!(!matches!(key!(ctrl-alt-b), key!(alt-b)));
+        assert!(!matches!(key!(ctrl-alt-b), key!(ctrl-b)));
     }
 }

@@ -22,12 +22,6 @@ pub fn main() {
                         println!("Arg! You savagely killed me with a {}", fmt.to_string(key_event).red());
                         break;
                     }
-                    key!(ctrl-shift-b) => {
-                        println!("You typed ctrl-shift-b");
-                    }
-                    key!(ctrl-b) => {
-                        println!("You typed ctrl-b");
-                    }
                     key!(ctrl-q) => {
                         println!("You typed {} which gracefully quits", fmt.to_string(key_event).green());
                         break;
