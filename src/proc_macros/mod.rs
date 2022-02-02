@@ -100,10 +100,21 @@ impl Parse for KeyEventDef {
                 quote! { Char(#c) }
             }
             _ => {
-                return Err(Error::new(
-                    code_span,
-                    format_args!("unrecognized key code {:?}", code),
-                ))
+                if input.peek(Token![-]) {
+                    // The code was likely meant to be a modifier
+                    return Err(Error::new(
+                        code_span,
+                        format_args!(
+                            "invalid modifier {:?}; expected `ctrl`, `alt` or `shift`",
+                            code
+                        ),
+                    ));
+                } else {
+                    return Err(Error::new(
+                        code_span,
+                        format_args!("unrecognized key code {:?}", code),
+                    ));
+                }
             }
         };
 
