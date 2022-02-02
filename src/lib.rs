@@ -87,11 +87,73 @@ pub const fn as_letter(key: KeyEvent) -> Option<char> {
     }
 }
 
+/// check and expand at compile-time the provided expression
+/// into a valid KeyEvent.
+///
+///
+/// For example:
+/// ```
+/// # use crokey::key;
+/// let key_event = key!(ctrl-c);
+/// ```
+/// is expanded into:
+///
+/// ```
+/// let key_event = crossterm::event::KeyEvent {
+///     modifiers: crossterm::event::KeyModifiers::CONTROL,
+///     code: crossterm::event::KeyCode::Char('\u{63}'),
+/// };
+/// ```
+///
+/// Keys which can't be valid identifiers in Rust must be put between simple quotes:
+/// ```
+/// # use crokey::key;
+/// let ke = key!(shift-'?');
+/// let ke = key!('5');
+/// let ke = key!(alt-']');
+/// ```
+#[macro_export]
+macro_rules! key {
+    ($($tt:tt)*) => {
+        $crate::__private::key!(($crate) $($tt)*)
+    };
+}
+
+// Not public API. This is internal and to be used only by `key!`.
+#[doc(hidden)]
+pub mod __private {
+    pub use crokey_proc_macros::key;
+    pub use crossterm;
+
+    use crossterm::event::KeyModifiers;
+    pub const MODS: KeyModifiers = KeyModifiers::NONE;
+    pub const MODS_CTRL: KeyModifiers = KeyModifiers::CONTROL;
+    pub const MODS_ALT: KeyModifiers = KeyModifiers::ALT;
+    pub const MODS_SHIFT: KeyModifiers = KeyModifiers::SHIFT;
+    pub const MODS_CTRL_ALT: KeyModifiers = KeyModifiers::CONTROL.union(KeyModifiers::ALT);
+    pub const MODS_ALT_SHIFT: KeyModifiers = KeyModifiers::ALT.union(KeyModifiers::SHIFT);
+    pub const MODS_CTRL_SHIFT: KeyModifiers = KeyModifiers::CONTROL.union(KeyModifiers::SHIFT);
+    pub const MODS_CTRL_ALT_SHIFT: KeyModifiers = KeyModifiers::CONTROL
+        .union(KeyModifiers::ALT)
+        .union(KeyModifiers::SHIFT);
+}
+
 #[cfg(test)]
 mod tests {
     use {
-        crokey_proc_macros::key,
+        crate::key,
         crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
+    };
+
+    const _: () = {
+        key!(x);
+        key!(ctrl - '{');
+        key!(alt - '{');
+        key!(shift - '{');
+        key!(ctrl - alt - f10);
+        key!(alt - shift - f10);
+        key!(ctrl - shift - f10);
+        key!(ctrl - alt - shift - enter);
     };
 
     fn no_mod(code: KeyCode) -> KeyEvent {
@@ -122,5 +184,11 @@ mod tests {
             KeyEvent::new(KeyCode::Char('c'), KeyModifiers::ALT | KeyModifiers::SHIFT)
         );
         assert_eq!(key!(shift - alt - '2'), key!(ALT - SHIFT - 2));
+    }
+
+    #[test]
+    fn key_pattern() {
+        assert!(matches!(key!(ctrl-alt-shift-c), key!(ctrl-alt-shift-c)));
+        assert!(!matches!(key!(ctrl-c), key!(ctrl-alt-shift-c)));
     }
 }
