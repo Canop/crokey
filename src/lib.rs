@@ -184,6 +184,16 @@ mod tests {
             KeyEvent::new(KeyCode::Char('c'), KeyModifiers::ALT | KeyModifiers::SHIFT)
         );
         assert_eq!(key!(shift - alt - '2'), key!(ALT - SHIFT - 2));
+        assert_eq!(key!(space), key!(' '));
+    }
+
+    #[test]
+    fn format() {
+        let format = crate::KeyEventFormat::default();
+        assert_eq!(format.to_string(key!(insert)), "Insert");
+        assert_eq!(format.to_string(key!(space)), "Space");
+        assert_eq!(format.to_string(key!(alt-Space)), "Alt-Space");
+        assert_eq!(format.to_string(key!(shift-' ')), "Shift-Space");
     }
 
     #[test]
