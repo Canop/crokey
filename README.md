@@ -79,3 +79,42 @@ let format = KeyEventFormat::default()
 assert_eq!(format.to_string(key!(shift-a)), "A");
 assert_eq!(format.to_string(key!(ctrl-c)), "^c");
 ```
+
+## Deserialize keybindings using Serde
+
+With the "serde" feature enabled, you can read configuration files in a direct way:
+
+```
+use {
+    crokey::*,
+    crossterm::event::KeyEvent,
+    serde::Deserialize,
+    std::collections::HashMap,
+};
+#[derive(Deserialize)]
+struct Config {
+    keybindings: HashMap<CroKey, String>,
+}
+static CONFIG_HJSON: &str = r#"
+{
+    keybindings: {
+        a: aardvark
+        shift-b: babirussa
+        ctrl-k: koala
+        alt-j: jaguar
+    }
+}
+"#;
+let config: Config = deser_hjson::from_str(CONFIG_HJSON).unwrap();
+let key_event: KeyEvent = key!(shift-b);
+assert_eq!(
+    config.keybindings.get(&key_event.into()).unwrap(),
+    "babirussa",
+);
+```
+
+You can use any Serde compatible format such as JSON or TOML.
+
+The `CroKey` wrapper type may be convenient as it implements `FromStr`,
+`Deserialize`, and `Display`, but its use is optional. The "deser_keybindings" example
+uses TOML and demonstrates how to have `KeyEvent` keys in the map instead of `Crokey`.

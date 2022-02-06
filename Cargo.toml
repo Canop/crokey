@@ -1,6 +1,6 @@
 [package]
 name = "crokey"
-version = "0.3.1"
+version = "0.4.0-dev"
 authors = ["dystroy <denys.seguret@gmail.com>"]
 edition = "2021"
 keywords = ["key", "parse"]
@@ -11,12 +11,19 @@ repository = "https://github.com/Canop/crokey"
 readme = "README.md"
 rust-version = "1.56"
 
+[features]
+default = ["serde"]
+# serde = ["serde"]
+
 [dependencies]
 crossterm = "0.22.1"
 crokey-proc_macros = { path = "src/proc_macros", version = "0.3.1" }
+once_cell = "1.9"
+serde = { optional = true, version = "1.0.130", features = ["derive"] }
 
 [dev-dependencies]
+deser-hjson = "1.0"
 trybuild = "1.0.55"
 
 [workspace]
-members = ["src/proc_macros", "examples/print_key"]
+members = ["src/proc_macros", "examples/deser_keybindings", "examples/print_key"]
