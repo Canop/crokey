@@ -119,7 +119,15 @@ pub use {
     wrapper::*,
 };
 
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use {
+    crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
+    once_cell::sync::Lazy,
+};
+
+/// A lazy initialized KeyEventFormat which can be considered as standard
+/// and which is used in the Display implementation of the [CroKey] wrapper
+/// type.
+pub static STANDARD_FORMAT: Lazy<KeyEventFormat> = Lazy::new(KeyEventFormat::default);
 
 /// return the raw char if the event is a letter event
 pub const fn as_letter(key: KeyEvent) -> Option<char> {

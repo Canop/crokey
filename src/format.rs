@@ -5,14 +5,8 @@
 
 use {
     crossterm::event::{KeyCode::*, KeyEvent, KeyModifiers},
-    once_cell::sync::Lazy,
     std::fmt,
 };
-
-/// A lazy initialized KeyEventFormat which can be considered as standard
-/// and which is used in the Display implementation of the CroKey wrapper
-/// type.
-pub static STANDARD_FORMAT: Lazy<KeyEventFormat> = Lazy::new(KeyEventFormat::default);
 
 /// A formatter to produce key combinations descriptions.
 ///
