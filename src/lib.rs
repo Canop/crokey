@@ -113,6 +113,7 @@ mod parse;
 mod wrapper;
 
 pub use {
+    crossterm,
     crokey_proc_macros::*,
     format::*,
     parse::*,

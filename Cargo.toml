@@ -1,6 +1,6 @@
 [package]
 name = "crokey"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["dystroy <denys.seguret@gmail.com>"]
 edition = "2021"
 keywords = ["key", "parse"]
