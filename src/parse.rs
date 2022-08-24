@@ -67,6 +67,8 @@ pub fn parse(raw: &str) -> Result<KeyEvent, ParseKeyError> {
         "f11" => F(11),
         "f12" => F(12),
         "space" => Char(' '),
+        "hyphen" => Char('-'),
+        "minus" => Char('-'),
         "tab" => Tab,
         c if c.len() == 1 => Char(c.chars().next().unwrap()),
         _ => {

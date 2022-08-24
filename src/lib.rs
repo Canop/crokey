@@ -238,6 +238,8 @@ mod tests {
         );
         assert_eq!(key!(shift - alt - '2'), key!(ALT - SHIFT - 2));
         assert_eq!(key!(space), key!(' '));
+        assert_eq!(key!(hyphen), key!('-'));
+        assert_eq!(key!(minus), key!('-'));
     }
 
     #[test]

@@ -93,6 +93,8 @@ impl Parse for KeyEventDef {
             "pageup" => quote! { PageUp },
             "right" => quote! { Right },
             "space" => quote! { Char(' ') },
+            "hyphen" => quote! { Char('-') },
+            "minus" => quote! { Char('-') },
             "tab" => quote! { Tab },
             "up" => quote! { Up },
             c if c.chars().count() == 1 => {
