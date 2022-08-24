@@ -249,6 +249,7 @@ mod tests {
         assert_eq!(format.to_string(key!(space)), "Space");
         assert_eq!(format.to_string(key!(alt-Space)), "Alt-Space");
         assert_eq!(format.to_string(key!(shift-' ')), "Shift-Space");
+        assert_eq!(format.to_string(key!(alt-hyphen)), "Alt--");
     }
 
     #[test]
