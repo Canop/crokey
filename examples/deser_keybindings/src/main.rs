@@ -40,6 +40,7 @@ shift-b = "babirussa"
 ctrl-k = "koala"
 alt-j = "jaguar"
 h = "hexapode"
+alt-hyphen = "nazebroque"
 "#;
 
 pub fn main() {

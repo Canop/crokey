@@ -134,6 +134,9 @@ impl<'s> fmt::Display for FormattedKeyEvent<'s> {
             Char(' ') => {
                 write!(f, "Space")?;
             }
+            Char('-') => {
+                write!(f, "Hyphen")?;
+            }
             Char('\r') | Char('\n') | Enter => {
                 write!(f, "{}", format.enter)?;
             }
