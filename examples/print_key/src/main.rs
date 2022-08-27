@@ -3,8 +3,8 @@ use {
     crokey::*,
     crossterm::{
         event::{read, Event},
-        terminal,
         style::Stylize,
+        terminal,
     },
 };
 
@@ -16,25 +16,30 @@ pub fn main() {
         let e = read();
         terminal::disable_raw_mode().unwrap();
         match e {
-            Ok(Event::Key(key_event)) => {
-                match key_event {
-                    key!(ctrl-c) => {
-                        println!("Arg! You savagely killed me with a {}", fmt.to_string(key_event).red());
-                        break;
-                    }
-                    key!(ctrl-q) => {
-                        println!("You typed {} which gracefully quits", fmt.to_string(key_event).green());
-                        break;
-                    }
-                    key!('?') | key!(shift-'?') => {
-                        println!("There's no help on this app");
-                    }
-                    _ => {
-                        println!("You typed {}", fmt.to_string(key_event).blue());
-                    }
+            Ok(Event::Key(key_event)) => match key_event {
+                key!(ctrl-c) => {
+                    println!(
+                        "Arg! You savagely killed me with a {}",
+                        fmt.to_string(key_event).red()
+                    );
+                    break;
                 }
-            }
-            e => { // any other even, for example a resize, we quit
+                key!(ctrl-q) => {
+                    println!(
+                        "You typed {} which gracefully quits",
+                        fmt.to_string(key_event).green()
+                    );
+                    break;
+                }
+                key!('?') | key!(shift-'?') => {
+                    println!("There's no help on this app");
+                }
+                _ => {
+                    println!("You typed {}", fmt.to_string(key_event).blue());
+                }
+            },
+            e => {
+                // any other even, for example a resize, we quit
                 eprintln!("quitting on {:?}", e);
                 break;
             }

@@ -35,9 +35,24 @@ impl std::error::Error for ParseKeyError {}
 /// but uppercase when it was typed with shift (i.e. we receive
 /// "g" for a lowercase, and "shift-G" for an uppercase)
 pub fn parse(raw: &str) -> Result<KeyEvent, ParseKeyError> {
-    let tokens: Vec<&str> = raw.split('-').collect();
-    let last = tokens[tokens.len() - 1].to_ascii_lowercase();
-    let mut code = match last.as_ref() {
+    let mut modifiers = KeyModifiers::empty();
+    let raw = raw.to_ascii_lowercase();
+    let mut raw: &str = raw.as_ref();
+    loop {
+        if let Some(end) = raw.strip_prefix("ctrl-") {
+            raw = end;
+            modifiers.insert(KeyModifiers::CONTROL);
+        } else if let Some(end) = raw.strip_prefix("alt-") {
+            raw = end;
+            modifiers.insert(KeyModifiers::ALT);
+        } else if let Some(end) = raw.strip_prefix("shift-") {
+            raw = end;
+            modifiers.insert(KeyModifiers::SHIFT);
+        } else {
+            break;
+        }
+    }
+    let code = match raw {
         "esc" => Esc,
         "enter" => Enter,
         "left" => Left,
@@ -48,7 +63,11 @@ pub fn parse(raw: &str) -> Result<KeyEvent, ParseKeyError> {
         "end" => End,
         "pageup" => PageUp,
         "pagedown" => PageDown,
-        "backtab" => BackTab,
+        "backtab" => {
+            // Crossterm always sends SHIFT with backtab
+            modifiers.insert(KeyModifiers::SHIFT);
+            BackTab
+        }
         "backspace" => Backspace,
         "del" => Delete,
         "delete" => Delete,
@@ -70,38 +89,17 @@ pub fn parse(raw: &str) -> Result<KeyEvent, ParseKeyError> {
         "hyphen" => Char('-'),
         "minus" => Char('-'),
         "tab" => Tab,
-        c if c.len() == 1 => Char(c.chars().next().unwrap()),
+        c if c.len() == 1 => {
+            let mut c = c.chars().next().unwrap();
+            if modifiers.contains(KeyModifiers::SHIFT) {
+                c = c.to_ascii_uppercase();
+            }
+            Char(c)
+        }
         _ => {
             return Err(ParseKeyError::new(raw));
         }
     };
-    let mut modifiers = KeyModifiers::empty();
-    if code == BackTab {
-        // Crossterm always sends the shift key with
-        // backtab
-        modifiers.insert(KeyModifiers::SHIFT);
-    }
-    for token in tokens.iter().take(tokens.len() - 1) {
-        match token.to_ascii_lowercase().as_ref() {
-            "ctrl" => {
-                modifiers.insert(KeyModifiers::CONTROL);
-            }
-            "alt" => {
-                modifiers.insert(KeyModifiers::ALT);
-            }
-            "shift" => {
-                modifiers.insert(KeyModifiers::SHIFT);
-                if let Char(c) = code {
-                    if c.is_ascii_lowercase() {
-                        code = Char(c.to_ascii_uppercase());
-                    }
-                }
-            }
-            _ => {
-                return Err(ParseKeyError::new(raw));
-            }
-        }
-    }
     Ok(KeyEvent { code, modifiers })
 }
 
@@ -113,9 +111,14 @@ fn check_key_parsing() {
         assert!(parsed.is_ok(), "failed to parse {:?} as key", raw);
         assert_eq!(parsed.unwrap(), key);
     }
+    assert!(parse("").is_err());
     check_ok("left", key!(left));
     check_ok("RIGHT", key!(right));
     check_ok("Home", key!(HOME));
+    check_ok(
+        "backtab",
+        KeyEvent::new(KeyCode::BackTab, KeyModifiers::SHIFT),
+    );
     check_ok("f1", KeyEvent::from(F(1)));
     check_ok("F2", KeyEvent::from(F(2)));
     check_ok("Enter", KeyEvent::from(Enter));
@@ -125,4 +128,27 @@ fn check_key_parsing() {
     check_ok("shift-q", KeyEvent::new(Char('Q'), KeyModifiers::SHIFT));
     check_ok("ctrl-Q", KeyEvent::new(Char('q'), KeyModifiers::CONTROL));
     check_ok("shift-Q", KeyEvent::new(Char('Q'), KeyModifiers::SHIFT));
+    check_ok(
+        "ctrl-shift-Q",
+        KeyEvent::new(Char('Q'), KeyModifiers::SHIFT | KeyModifiers::CONTROL),
+    );
+    check_ok("-", KeyEvent::new(Char('-'), KeyModifiers::NONE));
+    check_ok("Hyphen", KeyEvent::new(Char('-'), KeyModifiers::NONE));
+    check_ok("alt--", KeyEvent::new(Char('-'), KeyModifiers::ALT));
+    check_ok("alt-hyphen", KeyEvent::new(Char('-'), KeyModifiers::ALT));
+    check_ok("alt-hyphen", KeyEvent::new(Char('-'), KeyModifiers::ALT));
+    check_ok(
+        "ctrl-Shift-alt-space",
+        KeyEvent::new(
+            Char(' '),
+            KeyModifiers::ALT | KeyModifiers::SHIFT | KeyModifiers::ALT | KeyModifiers::CONTROL,
+        ),
+    );
+    check_ok(
+        "ctrl-shift-alt--",
+        KeyEvent::new(
+            Char('-'),
+            KeyModifiers::ALT | KeyModifiers::SHIFT | KeyModifiers::ALT | KeyModifiers::CONTROL,
+        ),
+    );
 }

@@ -3,8 +3,8 @@ use {
     crokey::*,
     crossterm::{
         event::{read, Event, KeyEvent},
-        terminal,
         style::Stylize,
+        terminal,
     },
     serde::{Deserialize, Deserializer},
     std::collections::HashMap,
@@ -40,7 +40,9 @@ shift-b = "babirussa"
 ctrl-k = "koala"
 alt-j = "jaguar"
 h = "hexapode"
-alt-hyphen = "nazebroque"
+shift-h = "HEXAPODE"
+- = "mandrill"
+alt-- = "nasalis"
 "#;
 
 pub fn main() {

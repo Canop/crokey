@@ -2,10 +2,7 @@ use {
     super::*,
     crossterm::event::KeyEvent,
     serde::{de, Deserialize, Deserializer},
-    std::{
-        fmt,
-        str::FromStr,
-    },
+    std::{fmt, str::FromStr},
 };
 
 /// A zero-cost wrapper type implementing Display and FromStr.
@@ -14,12 +11,13 @@ use {
 /// `Deserialize` which is handy to read whole configuration
 /// files with Serde.
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
-pub struct CroKey (KeyEvent);
+pub struct CroKey(KeyEvent);
 
 #[cfg(feature = "serde")]
 impl<'de> Deserialize<'de> for CroKey {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: Deserializer<'de>
+    where
+        D: Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
         FromStr::from_str(&s).map_err(de::Error::custom)
@@ -51,4 +49,3 @@ impl Into<KeyEvent> for CroKey {
         self.0
     }
 }
-
