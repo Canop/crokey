@@ -118,3 +118,17 @@ You can use any Serde compatible format such as JSON or TOML.
 The `CroKey` wrapper type may be convenient as it implements `FromStr`,
 `Deserialize`, and `Display`, but its use is optional. The "deser_keybindings" example
 uses TOML and demonstrates how to have `KeyEvent` keys in the map instead of `Crokey`.
+
+## Crossterm Compatibility
+
+Crokey includes Crossterm, so you don't have to import it and to avoid conflicts.
+
+Different versions of Crossterm have different capabilities and you may need a specific version.
+
+Here are the versions of Crossterm included in the currently maintained versions of Crokey:
+
+| crokey version | crossterm version |
+|----------------|-------------------|
+|  0.4.x         |  0.23.3           |
+|  0.5.x         |  0.24.0           |
+

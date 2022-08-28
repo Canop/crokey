@@ -1,6 +1,6 @@
 [package]
 name = "deser_keybindings"
-version = "0.4.0"
+version = "0.5.0"
 authors = ["dystroy <denys.seguret@gmail.com>"]
 edition = "2021"
 description = "An example of using crokey to deserialize keybindings"
@@ -9,7 +9,6 @@ readme = "README.md"
 
 [dependencies]
 crokey = { path = "../.." }
-crossterm = "0.23.1"
 serde = { version = "1.0.130", features = ["derive"] }
 toml = "0.5"
 

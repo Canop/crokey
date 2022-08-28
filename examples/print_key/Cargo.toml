@@ -1,6 +1,6 @@
 [package]
 name = "print_key"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["dystroy <denys.seguret@gmail.com>"]
 edition = "2021"
 description = "An example of using crokey to print the keys the user types"
@@ -9,4 +9,3 @@ readme = "README.md"
 
 [dependencies]
 crokey = { path = "../.." }
-crossterm = "0.23.1"

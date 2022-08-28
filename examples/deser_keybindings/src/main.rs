@@ -1,10 +1,12 @@
 //! cd to the deser_keybindings repository then do `cargo run`
 use {
-    crokey::*,
-    crossterm::{
-        event::{read, Event, KeyEvent},
-        style::Stylize,
-        terminal,
+    crokey::{
+        *,
+        crossterm::{
+            event::{read, Event, KeyEvent},
+            style::Stylize,
+            terminal,
+        },
     },
     serde::{Deserialize, Deserializer},
     std::collections::HashMap,
