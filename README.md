@@ -132,3 +132,5 @@ Here are the versions of Crossterm included in the currently maintained versions
 |  0.4.x         |  0.23.3           |
 |  0.5.x         |  0.24.0           |
 
+[about Crossterm 0.25](https://github.com/Canop/crokey/issues/16)
+
