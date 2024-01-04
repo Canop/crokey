@@ -136,6 +136,7 @@ pub const fn as_letter(key: KeyEvent) -> Option<char> {
         KeyEvent {
             code: KeyCode::Char(l),
             modifiers: KeyModifiers::NONE,
+            ..
         } => Some(l),
         _ => None,
     }
@@ -156,6 +157,8 @@ pub const fn as_letter(key: KeyEvent) -> Option<char> {
 /// let key_event = crossterm::event::KeyEvent {
 ///     modifiers: crossterm::event::KeyModifiers::CONTROL,
 ///     code: crossterm::event::KeyCode::Char('c'),
+///     kind: crossterm::event::KeyEventKind::Press,
+///     state: crossterm::event::KeyEventState::empty(),
 /// };
 /// ```
 ///

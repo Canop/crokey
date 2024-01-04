@@ -100,7 +100,7 @@ pub fn parse(raw: &str) -> Result<KeyEvent, ParseKeyError> {
             return Err(ParseKeyError::new(raw));
         }
     };
-    Ok(KeyEvent { code, modifiers })
+    Ok(KeyEvent::new(code, modifiers))
 }
 
 #[test]

@@ -158,6 +158,8 @@ pub fn key(input: TokenStream1) -> TokenStream1 {
         #crate_path::__private::crossterm::event::KeyEvent {
             modifiers: #crate_path::__private::#modifier_constant,
             code: #crate_path::__private::crossterm::event::KeyCode::#code,
+            kind: #crate_path::__private::crossterm::event::KeyEventKind::Press,
+            state: #crate_path::__private::crossterm::event::KeyEventState::NONE,
         }
     }
     .into()
