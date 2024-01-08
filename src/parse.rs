@@ -4,7 +4,8 @@
 //! - describing key combinations in strings
 
 use {
-    crossterm::event::{KeyCode::*, KeyEvent, KeyModifiers},
+    crate::KeyCombination,
+    crossterm::event::{KeyCode::*, KeyModifiers},
     std::fmt,
 };
 
@@ -34,7 +35,7 @@ impl std::error::Error for ParseKeyError {}
 /// The char we receive as code from crossterm is usually lowercase
 /// but uppercase when it was typed with shift (i.e. we receive
 /// "g" for a lowercase, and "shift-G" for an uppercase)
-pub fn parse(raw: &str) -> Result<KeyEvent, ParseKeyError> {
+pub fn parse(raw: &str) -> Result<KeyCombination, ParseKeyError> {
     let mut modifiers = KeyModifiers::empty();
     let raw = raw.to_ascii_lowercase();
     let mut raw: &str = raw.as_ref();
@@ -94,19 +95,23 @@ pub fn parse(raw: &str) -> Result<KeyEvent, ParseKeyError> {
             if modifiers.contains(KeyModifiers::SHIFT) {
                 c = c.to_ascii_uppercase();
             }
+            //let mut c = c.chars().next().unwrap();
+            //if c.is_ascii_uppercase() {
+            //    c = c.to_ascii_lowercase());
+            //}
             Char(c)
         }
         _ => {
             return Err(ParseKeyError::new(raw));
         }
     };
-    Ok(KeyEvent { code, modifiers })
+    Ok(KeyCombination { code, modifiers })
 }
 
 #[test]
 fn check_key_parsing() {
     use crate::*;
-    fn check_ok(raw: &str, key: KeyEvent) {
+    fn check_ok(raw: &str, key: KeyCombination) {
         let parsed = parse(raw);
         assert!(parsed.is_ok(), "failed to parse {:?} as key", raw);
         assert_eq!(parsed.unwrap(), key);
@@ -117,36 +122,36 @@ fn check_key_parsing() {
     check_ok("Home", key!(HOME));
     check_ok(
         "backtab",
-        KeyEvent::new(KeyCode::BackTab, KeyModifiers::SHIFT),
+        KeyCombination::new(KeyCode::BackTab, KeyModifiers::SHIFT),
     );
-    check_ok("f1", KeyEvent::from(F(1)));
-    check_ok("F2", KeyEvent::from(F(2)));
-    check_ok("Enter", KeyEvent::from(Enter));
-    check_ok("alt-enter", KeyEvent::new(Enter, KeyModifiers::ALT));
-    check_ok("insert", KeyEvent::from(Insert));
-    check_ok("ctrl-q", KeyEvent::new(Char('q'), KeyModifiers::CONTROL));
-    check_ok("shift-q", KeyEvent::new(Char('Q'), KeyModifiers::SHIFT));
-    check_ok("ctrl-Q", KeyEvent::new(Char('q'), KeyModifiers::CONTROL));
-    check_ok("shift-Q", KeyEvent::new(Char('Q'), KeyModifiers::SHIFT));
+    check_ok("f1", KeyCombination::from(F(1)));
+    check_ok("F2", KeyCombination::from(F(2)));
+    check_ok("Enter", KeyCombination::from(Enter));
+    check_ok("alt-enter", KeyCombination::new(Enter, KeyModifiers::ALT));
+    check_ok("insert", KeyCombination::from(Insert));
+    check_ok("ctrl-q", KeyCombination::new(Char('q'), KeyModifiers::CONTROL));
+    check_ok("shift-q", KeyCombination::new(Char('Q'), KeyModifiers::SHIFT));
+    check_ok("ctrl-Q", KeyCombination::new(Char('q'), KeyModifiers::CONTROL));
+    check_ok("shift-Q", KeyCombination::new(Char('Q'), KeyModifiers::SHIFT));
     check_ok(
         "ctrl-shift-Q",
-        KeyEvent::new(Char('Q'), KeyModifiers::SHIFT | KeyModifiers::CONTROL),
+        KeyCombination::new(Char('Q'), KeyModifiers::SHIFT | KeyModifiers::CONTROL),
     );
-    check_ok("-", KeyEvent::new(Char('-'), KeyModifiers::NONE));
-    check_ok("Hyphen", KeyEvent::new(Char('-'), KeyModifiers::NONE));
-    check_ok("alt--", KeyEvent::new(Char('-'), KeyModifiers::ALT));
-    check_ok("alt-hyphen", KeyEvent::new(Char('-'), KeyModifiers::ALT));
-    check_ok("alt-hyphen", KeyEvent::new(Char('-'), KeyModifiers::ALT));
+    check_ok("-", KeyCombination::new(Char('-'), KeyModifiers::NONE));
+    check_ok("Hyphen", KeyCombination::new(Char('-'), KeyModifiers::NONE));
+    check_ok("alt--", KeyCombination::new(Char('-'), KeyModifiers::ALT));
+    check_ok("alt-hyphen", KeyCombination::new(Char('-'), KeyModifiers::ALT));
+    check_ok("alt-hyphen", KeyCombination::new(Char('-'), KeyModifiers::ALT));
     check_ok(
         "ctrl-Shift-alt-space",
-        KeyEvent::new(
+        KeyCombination::new(
             Char(' '),
             KeyModifiers::ALT | KeyModifiers::SHIFT | KeyModifiers::ALT | KeyModifiers::CONTROL,
         ),
     );
     check_ok(
         "ctrl-shift-alt--",
-        KeyEvent::new(
+        KeyCombination::new(
             Char('-'),
             KeyModifiers::ALT | KeyModifiers::SHIFT | KeyModifiers::ALT | KeyModifiers::CONTROL,
         ),

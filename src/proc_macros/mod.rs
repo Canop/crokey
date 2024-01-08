@@ -8,7 +8,7 @@ use {
     },
 };
 
-struct KeyEventDef {
+struct KeyCombinationKey {
     pub crate_path: TokenStream,
     pub ctrl: bool,
     pub alt: bool,
@@ -16,7 +16,7 @@ struct KeyEventDef {
     pub code: TokenStream,
 }
 
-impl Parse for KeyEventDef {
+impl Parse for KeyCombinationKey {
     fn parse(input: ParseStream<'_>) -> Result<Self> {
         let crate_path = input.parse::<Group>()?.stream();
 
@@ -98,7 +98,10 @@ impl Parse for KeyEventDef {
             "tab" => quote! { Tab },
             "up" => quote! { Up },
             c if c.chars().count() == 1 => {
-                let c = c.chars().next().unwrap();
+                let mut c = c.chars().next().unwrap();
+                if shift {
+                    c = c.to_ascii_uppercase();
+                }
                 quote! { Char(#c) }
             }
             _ => {
@@ -120,7 +123,7 @@ impl Parse for KeyEventDef {
             }
         };
 
-        Ok(KeyEventDef {
+        Ok(KeyCombinationKey {
             crate_path,
             ctrl,
             alt,
@@ -134,7 +137,7 @@ impl Parse for KeyEventDef {
 #[doc(hidden)]
 #[proc_macro]
 pub fn key(input: TokenStream1) -> TokenStream1 {
-    let KeyEventDef {
+    let KeyCombinationKey {
         crate_path,
         ctrl,
         alt,
@@ -155,7 +158,7 @@ pub fn key(input: TokenStream1) -> TokenStream1 {
     let modifier_constant = Ident::new(&modifier_constant, Span::call_site());
 
     quote! {
-        #crate_path::__private::crossterm::event::KeyEvent {
+        #crate_path::KeyCombination {
             modifiers: #crate_path::__private::#modifier_constant,
             code: #crate_path::__private::crossterm::event::KeyCode::#code,
         }

@@ -9,14 +9,14 @@ use {
 };
 
 pub fn main() {
-    let fmt = KeyEventFormat::default();
+    let fmt = KeyCombinationFormat::default();
     println!("\nType any key combination (remember that your terminal intercepts many ones)");
     loop {
         terminal::enable_raw_mode().unwrap();
         let e = read();
         terminal::disable_raw_mode().unwrap();
         match e {
-            Ok(Event::Key(key_event)) => match key_event {
+            Ok(Event::Key(key_event)) => match key_event.into() {
                 key!(ctrl-c) => {
                     println!(
                         "Arg! You savagely killed me with a {}",

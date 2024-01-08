@@ -12,11 +12,11 @@
 //! use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 //! assert_eq!(
 //!     crokey::parse("alt-enter").unwrap(),
-//!     KeyEvent::new(KeyCode::Enter, KeyModifiers::ALT),
+//!     KeyEvent::new(KeyCode::Enter, KeyModifiers::ALT).into(),
 //! );
 //! assert_eq!(
 //!     crokey::parse("shift-F6").unwrap(),
-//!     KeyEvent::new(KeyCode::F(6), KeyModifiers::SHIFT),
+//!     KeyEvent::new(KeyCode::F(6), KeyModifiers::SHIFT).into(),
 //! );
 //! ```
 //!
@@ -31,7 +31,7 @@
 //! # use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 //! # use crossterm::style::Stylize;
 //! # let key_event = key!(a);
-//! let fmt = KeyEventFormat::default();
+//! let fmt = KeyCombinationFormat::default();
 //! # loop {
 //! match key_event {
 //!     key!(ctrl-c) => {
@@ -57,12 +57,12 @@
 //! use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 //!
 //! // The default format
-//! let format = KeyEventFormat::default();
+//! let format = KeyCombinationFormat::default();
 //! assert_eq!(format.to_string(key!(shift-a)), "Shift-a");
 //! assert_eq!(format.to_string(key!(ctrl-c)), "Ctrl-c");
 //!
 //! // A more compact format
-//! let format = KeyEventFormat::default()
+//! let format = KeyCombinationFormat::default()
 //!     .with_implicit_shift()
 //!     .with_control("^");
 //! assert_eq!(format.to_string(key!(shift-a)), "A");
@@ -80,9 +80,9 @@
 //!     serde::Deserialize,
 //!     std::collections::HashMap,
 //! };
-//! #[derive(Deserialize)]
+//! #[derive(Debug, Deserialize)]
 //! struct Config {
-//!     keybindings: HashMap<CroKey, String>,
+//!     keybindings: HashMap<KeyCombination, String>,
 //! }
 //! static CONFIG_HJSON: &str = r#"
 //! {
@@ -95,45 +95,40 @@
 //! }
 //! "#;
 //! let config: Config = deser_hjson::from_str(CONFIG_HJSON).unwrap();
-//! let key_event: KeyEvent = key!(shift-b);
+//! let key: KeyCombination = key!(shift-b);
 //! assert_eq!(
-//!     config.keybindings.get(&key_event.into()).unwrap(),
+//!     config.keybindings.get(&key).unwrap(),
 //!     "babirussa",
 //! );
 //! ```
 //!
 //! Instead of Hjson, you can use any Serde compatible format such as JSON or TOML.
 //!
-//! The [CroKey] type wraps `KeyEvent` and may be convenient as it implements `FromStr`,
-//! `Deserialize`, and `Display`, but its use is optional. The "deser_keybindings" example
-//! uses TOML and demonstrates how to have `KeyEvent` keys in the map instead of `Crokey`.
 
 mod format;
 mod parse;
-mod wrapper;
+mod key_combination;
 
 pub use {
     crossterm,
-    crokey_proc_macros::*,
     format::*,
     parse::*,
-    wrapper::*,
+    key_combination::*,
 };
 
 use {
-    crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
+    crossterm::event::{KeyCode, KeyModifiers},
     once_cell::sync::Lazy,
 };
 
-/// A lazy initialized KeyEventFormat which can be considered as standard
-/// and which is used in the Display implementation of the [CroKey] wrapper
-/// type.
-pub static STANDARD_FORMAT: Lazy<KeyEventFormat> = Lazy::new(KeyEventFormat::default);
+/// A lazy initialized KeyCombinationFormat which can be considered as standard
+/// and which is used in the Display implementation of the [KeyCombination] type.
+pub static STANDARD_FORMAT: Lazy<KeyCombinationFormat> = Lazy::new(KeyCombinationFormat::default);
 
 /// return the raw char if the event is a letter event
-pub const fn as_letter(key: KeyEvent) -> Option<char> {
+pub const fn as_letter(key: KeyCombination) -> Option<char> {
     match key {
-        KeyEvent {
+        KeyCombination {
             code: KeyCode::Char(l),
             modifiers: KeyModifiers::NONE,
         } => Some(l),
@@ -153,7 +148,7 @@ pub const fn as_letter(key: KeyEvent) -> Option<char> {
 /// is expanded into (roughly):
 ///
 /// ```
-/// let key_event = crossterm::event::KeyEvent {
+/// let key_event = crokey::KeyCombination {
 ///     modifiers: crossterm::event::KeyModifiers::CONTROL,
 ///     code: crossterm::event::KeyCode::Char('c'),
 /// };
@@ -194,8 +189,8 @@ pub mod __private {
 #[cfg(test)]
 mod tests {
     use {
-        crate::key,
-        crossterm::event::{KeyCode, KeyEvent, KeyModifiers},
+        crate::{key, KeyCombination},
+        crossterm::event::{KeyCode, KeyModifiers},
     };
 
     const _: () = {
@@ -209,8 +204,8 @@ mod tests {
         key!(ctrl - alt - shift - enter);
     };
 
-    fn no_mod(code: KeyCode) -> KeyEvent {
-        KeyEvent::new(code, KeyModifiers::NONE)
+    fn no_mod(code: KeyCode) -> KeyCombination {
+        code.into()
     }
 
     #[test]
@@ -230,11 +225,11 @@ mod tests {
         assert_eq!(key!(F10), no_mod(KeyCode::F(10)));
         assert_eq!(
             key!(ctrl - c),
-            KeyEvent::new(KeyCode::Char('c'), KeyModifiers::CONTROL)
+            KeyCombination::new(KeyCode::Char('c'), KeyModifiers::CONTROL)
         );
         assert_eq!(
             key!(alt - shift - c),
-            KeyEvent::new(KeyCode::Char('c'), KeyModifiers::ALT | KeyModifiers::SHIFT)
+            KeyCombination::new(KeyCode::Char('C'), KeyModifiers::ALT | KeyModifiers::SHIFT)
         );
         assert_eq!(key!(shift - alt - '2'), key!(ALT - SHIFT - 2));
         assert_eq!(key!(space), key!(' '));
@@ -244,7 +239,7 @@ mod tests {
 
     #[test]
     fn format() {
-        let format = crate::KeyEventFormat::default();
+        let format = crate::KeyCombinationFormat::default();
         assert_eq!(format.to_string(key!(insert)), "Insert");
         assert_eq!(format.to_string(key!(space)), "Space");
         assert_eq!(format.to_string(key!(alt-Space)), "Alt-Space");
