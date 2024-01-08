@@ -129,6 +129,6 @@ Here are the versions of Crossterm included in the currently maintained versions
 
 | crokey version | crossterm version |
 |----------------|-------------------|
-|  0.4.x         |  0.23.3           |
+|  0.4.x         |  0.23.2           |
 |  0.5.x         |  0.24.0           |
 
