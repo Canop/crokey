@@ -13,7 +13,7 @@ pub struct KeyCombination {
 
 impl KeyCombination {
     /// Create a new KeyCombination from a KeyCode and a set of modifiers
-    pub fn new(code: KeyCode, modifiers: KeyModifiers) -> Self {
+    pub const fn new(code: KeyCode, modifiers: KeyModifiers) -> Self {
         Self { code, modifiers }
     }
     /// Fix the case of the code to uppercase if the shift modifier is present.
