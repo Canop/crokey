@@ -23,16 +23,29 @@ use {
 /// This is the maximum number of keys we can combine
 const MAX_PRESS_COUNT: usize = 3;
 
+/// Consumes key events and combines them into key combinations.
+///
+/// See the print_key_events example.
 #[derive(Debug, Default)]
 pub struct Combiner {
     combining: bool,
     keyboard_enhancement_flags_pushed: bool,
     down_keys: Vec<KeyEvent>,
     shift_pressed: bool,
-    releases_to_ignore: isize,
 }
 
 impl Combiner {
+
+    /// Try to enable combining more than one non-modifier key into a combination.
+    ///
+    /// Return Ok(false) when the terminal doesn't support the kitty protocol.
+    ///
+    /// A downside of combining is that key combinations are produced on key release
+    /// instead of key press, which may feel "slower".
+    ///
+    /// Behind the scene, this function pushes the keyboard enhancement flags
+    /// to the terminal. The flags are popped, and the normal state of the terminal
+    /// restored, when the Combiner is dropped.
     pub fn enable_combining(&mut self) -> io::Result<bool> {
         if self.combining {
             return Ok(true);
@@ -61,6 +74,10 @@ impl Combiner {
         self.down_keys.clear();
         key_combination
     }
+    /// Receive a key event and return a key combination if one is ready.
+    ///
+    /// When combining is enabled, the key combination is only returned on a
+    /// key release event.
     pub fn transform(&mut self, key: KeyEvent) -> Option<KeyCombination> {
         if self.combining {
             self.transform_combining(key)
@@ -92,10 +109,6 @@ impl Combiner {
                 }
             }
             KeyEventKind::Release => {
-                if self.releases_to_ignore > 0 {
-                    self.releases_to_ignore -= 1;
-                    return None;
-                }
                 // this release ends the combination in progress
                 self.combine()
             }

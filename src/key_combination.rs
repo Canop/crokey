@@ -14,7 +14,7 @@ pub struct KeyCombination {
     pub modifiers: KeyModifiers,
 }
 
-/// change the char to uppercase when the modifier shift is present,
+/// Change the char to uppercase when the modifier shift is present,
 /// otherwise if the char is uppercase, return true
 fn normalize_key_code(code: &mut KeyCode, modifiers: KeyModifiers) -> bool {
     if modifiers.contains(KeyModifiers::SHIFT) {
@@ -51,13 +51,15 @@ impl KeyCombination {
     pub const fn is_ansi_compatible(self) -> bool {
         matches!(self.codes, OneToThree::One(_))
     }
+    /// Return a normailzed version of the combination.
+    ///
     /// Fix the case of the code to uppercase if the shift modifier is present.
     /// Add the SHIFT modifier if one code is uppercase.
     ///
     /// This allows direct comparisons with the fields of crossterm::event::KeyEvent
     /// whose code is uppercase when the shift modifier is present. And supports the
     /// case where the modifier isn't mentionned but the key is uppercase.
-    pub fn normalize(mut self) -> Self {
+    pub fn normalized(mut self) -> Self {
         let mut shift = normalize_key_code(self.codes.first_mut(), self.modifiers);
         if let Some(ref mut code) = self.codes.get_mut(1) {
             shift |= normalize_key_code(code, self.modifiers);
@@ -112,7 +114,7 @@ impl From<KeyEvent> for KeyCombination {
             codes: key_event.code.into(),
             modifiers: key_event.modifiers,
         };
-        raw.normalize()
+        raw.normalized()
     }
 }
 
@@ -128,7 +130,8 @@ impl TryFrom<&[KeyEvent]> for KeyCombination {
             codes.push(key_event.code);
         }
         let codes: OneToThree<KeyCode> = codes.try_into()?;
-        Ok(Self::new(codes, modifiers))
+        let raw = Self::new(codes, modifiers);
+        Ok(raw.normalized())
     }
 }
 

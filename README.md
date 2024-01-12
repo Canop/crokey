@@ -180,14 +180,6 @@ uses TOML and demonstrates how to have `KeyEvent` keys in the map instead of `Cr
 
 ## Crossterm Compatibility
 
-Crokey includes Crossterm, so you don't have to import it and to avoid conflicts.
+Crokey includes and reexports Crossterm, so you don't have to import it and to avoid conflicts.
 
-Different versions of Crossterm have different capabilities and you may need a specific version.
-
-Here are the versions of Crossterm included in the currently maintained versions of Crokey:
-
-| crokey version | crossterm version |
-|----------------|-------------------|
-|  0.4.x         |  0.23.2           |
-|  0.5.x         |  0.24.0           |
 
