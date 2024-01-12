@@ -46,6 +46,15 @@ use {
 ///     ),
 ///     "alt-F6",
 /// );
+/// assert_eq!(
+///     format.to_string(
+///         KeyCombination::new(
+///             (KeyCode::Char('u'), KeyCode::Char('i')),
+///             KeyModifiers::NONE,
+///         )
+///     ),
+///     "i-u",
+/// );
 ///
 /// ```
 #[derive(Debug, Clone)]
@@ -55,6 +64,7 @@ pub struct KeyCombinationFormat {
     pub shift: String,
     pub enter: String,
     pub uppercase_shift: bool,
+    pub key_separator: String,
 }
 
 impl Default for KeyCombinationFormat {
@@ -65,6 +75,7 @@ impl Default for KeyCombinationFormat {
             shift: "Shift-".to_string(),
             enter: "Enter".to_string(),
             uppercase_shift: false,
+            key_separator: "-".to_string(),
         }
     }
 }
@@ -131,27 +142,32 @@ impl<'s> fmt::Display for FormattedKeyCombination<'s> {
         if key.modifiers.contains(KeyModifiers::SHIFT) {
             write!(f, "{}", format.shift)?;
         }
-        match key.code {
-            Char(' ') => {
-                write!(f, "Space")?;
+        for (i, code) in key.codes.iter().enumerate() {
+            if i > 0 {
+                write!(f, "{}", format.key_separator)?;
             }
-            Char('-') => {
-                write!(f, "Hyphen")?;
-            }
-            Char('\r') | Char('\n') | Enter => {
-                write!(f, "{}", format.enter)?;
-            }
-            Char(c) if key.modifiers.contains(KeyModifiers::SHIFT) && format.uppercase_shift => {
-                write!(f, "{}", c.to_ascii_uppercase())?;
-            }
-            Char(c) => {
-                write!(f, "{}", c.to_ascii_lowercase())?;
-            }
-            F(u) => {
-                write!(f, "F{u}")?;
-            }
-            _ => {
-                write!(f, "{:?}", key.code)?;
+            match code {
+                Char(' ') => {
+                    write!(f, "Space")?;
+                }
+                Char('-') => {
+                    write!(f, "Hyphen")?;
+                }
+                Char('\r') | Char('\n') | Enter => {
+                    write!(f, "{}", format.enter)?;
+                }
+                Char(c) if key.modifiers.contains(KeyModifiers::SHIFT) && format.uppercase_shift => {
+                    write!(f, "{}", c.to_ascii_uppercase())?;
+                }
+                Char(c) => {
+                    write!(f, "{}", c.to_ascii_lowercase())?;
+                }
+                F(u) => {
+                    write!(f, "F{u}")?;
+                }
+                _ => {
+                    write!(f, "{:?}", code)?;
+                }
             }
         }
         Ok(())

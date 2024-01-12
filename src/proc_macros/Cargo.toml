@@ -7,10 +7,13 @@ license = "MIT"
 edition = "2018"
 
 [dependencies]
-syn = { version = "1.0", default-features = false, features = ["parsing", "proc-macro"] }
+crossterm = "0.27"
 proc-macro2 = "1.0"
 quote = "1.0"
+strict = "0.2"
+syn = { version = "1.0", default-features = false, features = ["parsing", "proc-macro"] }
 
 [lib]
 proc-macro = true
 path = "mod.rs"
+
