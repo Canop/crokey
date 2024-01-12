@@ -29,4 +29,4 @@ trybuild = "1.0.55"
 members = ["src/proc_macros", "examples/deser_keybindings", "examples/print_key"]
 
 [patch.crates-io]
-strict = { path = "../strict" }
+# strict = { path = "../strict" }
