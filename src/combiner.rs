@@ -61,6 +61,9 @@ impl Combiner {
         self.combining = true;
         Ok(true)
     }
+    pub fn is_combining(&self) -> bool {
+        self.combining
+    }
     /// Take all the down_keys, combine them into a KeyCombination
     fn combine(&mut self) -> Option<KeyCombination> {
         let mut key_combination = KeyCombination::try_from(self.down_keys.as_slice())

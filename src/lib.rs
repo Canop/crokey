@@ -168,6 +168,7 @@
 
 mod combiner;
 mod format;
+mod key_event;
 mod parse;
 mod key_combination;
 
@@ -175,6 +176,7 @@ pub use {
     combiner::*,
     crossterm,
     format::*,
+    key_event::*,
     parse::*,
     key_combination::*,
     strict::OneToThree,

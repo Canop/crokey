@@ -15,9 +15,12 @@ pub struct KeyCombination {
 }
 
 /// Change the char to uppercase when the modifier shift is present,
-/// otherwise if the char is uppercase, return true
+/// otherwise if the char is uppercase, return true.
+/// If the key is the `\r' or '\n' char, change it to KeyCode::Enter.
 fn normalize_key_code(code: &mut KeyCode, modifiers: KeyModifiers) -> bool {
-    if modifiers.contains(KeyModifiers::SHIFT) {
+    if matches!(code, KeyCode::Char('\r') | KeyCode::Char('\n')) {
+        *code = KeyCode::Enter;
+    } else if modifiers.contains(KeyModifiers::SHIFT) {
         if let KeyCode::Char(c) = code {
             if c.is_ascii_lowercase() {
                 *code = KeyCode::Char(c.to_ascii_uppercase());
