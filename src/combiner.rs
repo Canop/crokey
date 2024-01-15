@@ -65,16 +65,18 @@ impl Combiner {
         self.combining
     }
     /// Take all the down_keys, combine them into a KeyCombination
-    fn combine(&mut self) -> Option<KeyCombination> {
+    fn combine(&mut self, clear: bool) -> Option<KeyCombination> {
         let mut key_combination = KeyCombination::try_from(self.down_keys.as_slice())
             .ok(); // it may be empty, in which case we return None
         if self.shift_pressed {
             if let Some(ref mut key_combination) = key_combination {
                 key_combination.modifiers |= KeyModifiers::SHIFT;
             }
+        }
+        if clear {
+            self.down_keys.clear();
             self.shift_pressed = false;
         }
-        self.down_keys.clear();
         key_combination
     }
     /// Receive a key event and return a key combination if one is ready.
@@ -105,19 +107,17 @@ impl Combiner {
                 if self.down_keys.len() == MAX_PRESS_COUNT {
                     // As we can't handle more than 3 keys, we send them all
                     // as a combination.
-                    // But it means some releases will have to be ignored.
-                    self.combine()
+                    self.combine(true)
                 } else {
                     None
                 }
             }
             KeyEventKind::Release => {
                 // this release ends the combination in progress
-                self.combine()
+                self.combine(true)
             }
             KeyEventKind::Repeat => {
-                // we just ignore it
-                None
+                self.combine(false)
             }
         }
     }
@@ -138,12 +138,15 @@ impl Combiner {
 impl Drop for Combiner {
     fn drop(&mut self) {
         if self.keyboard_enhancement_flags_pushed {
-            pop_keyboard_enhancement_flags();
+            let _ = pop_keyboard_enhancement_flags();
         }
     }
 }
 
-fn push_keyboard_enhancement_flags() -> io::Result<()> {
+/// Change the state of the terminal to enable combining keys.
+/// This is done automatically by Combiner::enable_combining
+/// so you should usually not need to call this function.
+pub fn push_keyboard_enhancement_flags() -> io::Result<()> {
     let mut stdout = io::stdout();
     execute!(
         stdout,
@@ -155,7 +158,11 @@ fn push_keyboard_enhancement_flags() -> io::Result<()> {
         )
     )
 }
-fn pop_keyboard_enhancement_flags() {
+
+/// Restore the "normal" state of the terminal.
+/// This is done automatically by the combiner on drop,
+/// so you should usually not need to call this function.
+pub fn pop_keyboard_enhancement_flags() -> io::Result<()>{
     let mut stdout = io::stdout();
-    let _ = execute!(stdout, PopKeyboardEnhancementFlags,);
+    execute!(stdout, PopKeyboardEnhancementFlags)
 }
