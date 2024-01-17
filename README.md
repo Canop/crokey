@@ -19,6 +19,7 @@ based terminal applications by providing functions
 - parsing key combinations from strings
 - describing key combinations in strings
 - parsing key combinations at compile time
+- combining Crossterm key events in key combinations
 
 ## The KeyCombination
 
