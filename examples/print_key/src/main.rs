@@ -1,4 +1,4 @@
-//! cd to the print_key repository then do `cargo run`
+//! To run this example, cd to the print_key repository then do `cargo run`
 use {
     crokey::*,
     crossterm::{
@@ -27,32 +27,27 @@ pub fn main() {
                 let Some(key_combination) = combiner.transform(key_event) else {
                     continue;
                 };
+                let key = fmt.to_string(key_combination);
                 match key_combination {
                     key!(ctrl-c) => {
-                        println!(
-                            "Arg! You savagely killed me with a {}",
-                            fmt.to_string(key_combination).red()
-                        );
+                        println!("Arg! You savagely killed me with a {}", key.red());
                         break;
                     }
                     key!(ctrl-q) => {
-                        println!(
-                            "You typed {} which gracefully quits",
-                            fmt.to_string(key_combination).green()
-                        );
+                        println!("You typed {} which gracefully quits", key.green());
                         break;
                     }
                     key!('?') | key!(shift-'?') => {
-                        println!("There's no help on this app");
+                        println!("{}", "There's no help on this app".red());
                     }
                     _ => {
-                        println!("You typed {}", fmt.to_string(key_combination).blue());
+                        println!("You typed {}", key.blue());
                     }
                 }
             }
             e => {
-                // any other even, for example a resize, we quit
-                eprintln!("quitting on {:?}", e);
+                // any other event, for example a resize, we quit
+                eprintln!("Quitting on {:?}", e);
                 break;
             }
         }
