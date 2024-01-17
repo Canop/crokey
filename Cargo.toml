@@ -1,6 +1,6 @@
 [package]
 name = "crokey"
-version = "0.5.1"
+version = "0.6.0"
 authors = ["dystroy <denys.seguret@gmail.com>"]
 edition = "2021"
 keywords = ["key", "parse"]
@@ -15,10 +15,11 @@ rust-version = "1.56"
 default = ["serde"]
 
 [dependencies]
-crossterm = "0.24.0"
-crokey-proc_macros = { path = "src/proc_macros", version = "0.5.1" }
+crossterm = "0.27"
+crokey-proc_macros = { path = "src/proc_macros", version = "0.6.0" }
 once_cell = "1.12"
 serde = { optional = true, version = "1.0.130", features = ["derive"] }
+strict = "0.2"
 
 [dev-dependencies]
 deser-hjson = "1.0"
@@ -26,3 +27,6 @@ trybuild = "1.0.55"
 
 [workspace]
 members = ["src/proc_macros", "examples/deser_keybindings", "examples/print_key"]
+
+[patch.crates-io]
+# strict = { path = "../strict" }

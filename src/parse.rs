@@ -4,7 +4,14 @@
 //! - describing key combinations in strings
 
 use {
-    crossterm::event::{KeyCode::*, KeyEvent, KeyModifiers},
+    crate::{
+        OneToThree,
+        KeyCombination,
+    },
+    crossterm::event::{
+        KeyCode::{self, *},
+        KeyModifiers,
+    },
     std::fmt,
 };
 
@@ -28,30 +35,7 @@ impl fmt::Display for ParseKeyError {
 
 impl std::error::Error for ParseKeyError {}
 
-/// parse a string as a keyboard key combination definition.
-///
-/// About the case:
-/// The char we receive as code from crossterm is usually lowercase
-/// but uppercase when it was typed with shift (i.e. we receive
-/// "g" for a lowercase, and "shift-G" for an uppercase)
-pub fn parse(raw: &str) -> Result<KeyEvent, ParseKeyError> {
-    let mut modifiers = KeyModifiers::empty();
-    let raw = raw.to_ascii_lowercase();
-    let mut raw: &str = raw.as_ref();
-    loop {
-        if let Some(end) = raw.strip_prefix("ctrl-") {
-            raw = end;
-            modifiers.insert(KeyModifiers::CONTROL);
-        } else if let Some(end) = raw.strip_prefix("alt-") {
-            raw = end;
-            modifiers.insert(KeyModifiers::ALT);
-        } else if let Some(end) = raw.strip_prefix("shift-") {
-            raw = end;
-            modifiers.insert(KeyModifiers::SHIFT);
-        } else {
-            break;
-        }
-    }
+pub fn parse_key_code(raw: &str, shift: bool) -> Result<KeyCode, ParseKeyError> {
     let code = match raw {
         "esc" => Esc,
         "enter" => Enter,
@@ -63,11 +47,7 @@ pub fn parse(raw: &str) -> Result<KeyEvent, ParseKeyError> {
         "end" => End,
         "pageup" => PageUp,
         "pagedown" => PageDown,
-        "backtab" => {
-            // Crossterm always sends SHIFT with backtab
-            modifiers.insert(KeyModifiers::SHIFT);
-            BackTab
-        }
+        "backtab" => BackTab,
         "backspace" => Backspace,
         "del" => Delete,
         "delete" => Delete,
@@ -91,7 +71,7 @@ pub fn parse(raw: &str) -> Result<KeyEvent, ParseKeyError> {
         "tab" => Tab,
         c if c.len() == 1 => {
             let mut c = c.chars().next().unwrap();
-            if modifiers.contains(KeyModifiers::SHIFT) {
+            if shift {
                 c = c.to_ascii_uppercase();
             }
             Char(c)
@@ -100,15 +80,57 @@ pub fn parse(raw: &str) -> Result<KeyEvent, ParseKeyError> {
             return Err(ParseKeyError::new(raw));
         }
     };
-    Ok(KeyEvent { code, modifiers })
+    Ok(code)
+}
+
+/// parse a string as a keyboard key combination definition.
+///
+/// About the case:
+/// The char we receive as code from crossterm is usually lowercase
+/// but uppercase when it was typed with shift (i.e. we receive
+/// "g" for a lowercase, and "shift-G" for an uppercase)
+pub fn parse(raw: &str) -> Result<KeyCombination, ParseKeyError> {
+    let mut modifiers = KeyModifiers::empty();
+    let raw = raw.to_ascii_lowercase();
+    let mut raw: &str = raw.as_ref();
+    loop {
+        if let Some(end) = raw.strip_prefix("ctrl-") {
+            raw = end;
+            modifiers.insert(KeyModifiers::CONTROL);
+        } else if let Some(end) = raw.strip_prefix("alt-") {
+            raw = end;
+            modifiers.insert(KeyModifiers::ALT);
+        } else if let Some(end) = raw.strip_prefix("shift-") {
+            raw = end;
+            modifiers.insert(KeyModifiers::SHIFT);
+        } else {
+            break;
+        }
+    }
+    let codes = if raw == "-" {
+        OneToThree::One(Char('-'))
+    } else {
+        let mut codes = Vec::new();
+        let shift =  modifiers.contains(KeyModifiers::SHIFT);
+        for raw in raw.split('-') {
+            let code = parse_key_code(raw, shift)?;
+            if code == BackTab {
+                // Crossterm always sends SHIFT with backtab
+                modifiers.insert(KeyModifiers::SHIFT);
+            }
+            codes.push(code);
+        }
+        codes.try_into().map_err(|_| ParseKeyError::new("".to_string()))?
+    };
+    Ok(KeyCombination::new(codes, modifiers))
 }
 
 #[test]
 fn check_key_parsing() {
     use crate::*;
-    fn check_ok(raw: &str, key: KeyEvent) {
+    fn check_ok(raw: &str, key: KeyCombination) {
         let parsed = parse(raw);
-        assert!(parsed.is_ok(), "failed to parse {:?} as key", raw);
+        assert!(parsed.is_ok(), "failed to parse {:?} as key combination", raw);
         assert_eq!(parsed.unwrap(), key);
     }
     assert!(parse("").is_err());
@@ -117,38 +139,79 @@ fn check_key_parsing() {
     check_ok("Home", key!(HOME));
     check_ok(
         "backtab",
-        KeyEvent::new(KeyCode::BackTab, KeyModifiers::SHIFT),
+        KeyCombination::new(KeyCode::BackTab, KeyModifiers::SHIFT),
     );
-    check_ok("f1", KeyEvent::from(F(1)));
-    check_ok("F2", KeyEvent::from(F(2)));
-    check_ok("Enter", KeyEvent::from(Enter));
-    check_ok("alt-enter", KeyEvent::new(Enter, KeyModifiers::ALT));
-    check_ok("insert", KeyEvent::from(Insert));
-    check_ok("ctrl-q", KeyEvent::new(Char('q'), KeyModifiers::CONTROL));
-    check_ok("shift-q", KeyEvent::new(Char('Q'), KeyModifiers::SHIFT));
-    check_ok("ctrl-Q", KeyEvent::new(Char('q'), KeyModifiers::CONTROL));
-    check_ok("shift-Q", KeyEvent::new(Char('Q'), KeyModifiers::SHIFT));
+    check_ok("f1", KeyCombination::from(F(1)));
+    check_ok("F2", KeyCombination::from(F(2)));
+    check_ok("Enter", KeyCombination::from(Enter));
+    check_ok("alt-enter", KeyCombination::new(Enter, KeyModifiers::ALT));
+    check_ok("insert", KeyCombination::from(Insert));
+    check_ok(
+        "ctrl-q",
+        KeyCombination::new(Char('q'), KeyModifiers::CONTROL),
+    );
+    check_ok(
+        "shift-q",
+        KeyCombination::new(Char('Q'), KeyModifiers::SHIFT),
+    );
+    check_ok(
+        "ctrl-Q",
+        KeyCombination::new(Char('q'), KeyModifiers::CONTROL),
+    );
+    check_ok(
+        "shift-Q",
+        KeyCombination::new(Char('Q'), KeyModifiers::SHIFT),
+    );
     check_ok(
         "ctrl-shift-Q",
-        KeyEvent::new(Char('Q'), KeyModifiers::SHIFT | KeyModifiers::CONTROL),
+        KeyCombination::new(Char('Q'), KeyModifiers::SHIFT | KeyModifiers::CONTROL),
     );
-    check_ok("-", KeyEvent::new(Char('-'), KeyModifiers::NONE));
-    check_ok("Hyphen", KeyEvent::new(Char('-'), KeyModifiers::NONE));
-    check_ok("alt--", KeyEvent::new(Char('-'), KeyModifiers::ALT));
-    check_ok("alt-hyphen", KeyEvent::new(Char('-'), KeyModifiers::ALT));
-    check_ok("alt-hyphen", KeyEvent::new(Char('-'), KeyModifiers::ALT));
+    check_ok("-", KeyCombination::new(Char('-'), KeyModifiers::NONE));
+    check_ok("Hyphen", KeyCombination::new(Char('-'), KeyModifiers::NONE));
+    check_ok("alt--", KeyCombination::new(Char('-'), KeyModifiers::ALT));
+    check_ok(
+        "alt-hyphen",
+        KeyCombination::new(Char('-'), KeyModifiers::ALT),
+    );
+    check_ok(
+        "alt-hyphen",
+        KeyCombination::new(Char('-'), KeyModifiers::ALT),
+    );
     check_ok(
         "ctrl-Shift-alt-space",
-        KeyEvent::new(
+        KeyCombination::new(
             Char(' '),
             KeyModifiers::ALT | KeyModifiers::SHIFT | KeyModifiers::ALT | KeyModifiers::CONTROL,
         ),
     );
     check_ok(
         "ctrl-shift-alt--",
-        KeyEvent::new(
+        KeyCombination::new(
             Char('-'),
             KeyModifiers::ALT | KeyModifiers::SHIFT | KeyModifiers::ALT | KeyModifiers::CONTROL,
+        ),
+    );
+
+    // multiple codes
+    check_ok(
+        "alt-f12-@",
+        KeyCombination::new(
+            OneToThree::Two(F(12), Char('@')),
+            KeyModifiers::ALT,
+        ),
+    );
+    check_ok(
+        "alt-f12-@",
+        KeyCombination::new(
+            OneToThree::Two(Char('@'), F(12)), // it's the same because the codes are sorted
+            KeyModifiers::ALT,
+        ),
+    );
+    check_ok(
+        "a-b",
+        KeyCombination::new(
+            OneToThree::Two(Char('a'), Char('b')),
+            KeyModifiers::NONE,
         ),
     );
 }
