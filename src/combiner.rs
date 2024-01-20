@@ -20,32 +20,45 @@ use {
     },
 };
 
-/// This is the maximum number of keys we can combine
+/// This is the maximum number of keys we can combine.
+/// It can't be changed just here, as the KeyCombination type doesn't support
+/// more than 3 non-modifier keys
 const MAX_PRESS_COUNT: usize = 3;
 
 /// Consumes key events and combines them into key combinations.
 ///
 /// See the print_key_events example.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Combiner {
     combining: bool,
     keyboard_enhancement_flags_pushed: bool,
+    mandate_modifier_for_multiple_keys: bool,
     down_keys: Vec<KeyEvent>,
     shift_pressed: bool,
 }
 
-impl Combiner {
+impl Default for Combiner {
+    fn default() -> Self {
+        Self {
+            combining: false,
+            keyboard_enhancement_flags_pushed: false,
+            mandate_modifier_for_multiple_keys: true,
+            down_keys: Vec::new(),
+            shift_pressed: false,
+        }
+    }
+}
 
+impl Combiner {
     /// Try to enable combining more than one non-modifier key into a combination.
     ///
     /// Return Ok(false) when the terminal doesn't support the kitty protocol.
     ///
-    /// A downside of combining is that key combinations are produced on key release
-    /// instead of key press, which may feel "slower".
-    ///
     /// Behind the scene, this function pushes the keyboard enhancement flags
     /// to the terminal. The flags are popped, and the normal state of the terminal
     /// restored, when the Combiner is dropped.
+    ///
+    /// This function does nothing if combining is already enabled.
     pub fn enable_combining(&mut self) -> io::Result<bool> {
         if self.combining {
             return Ok(true);
@@ -61,8 +74,28 @@ impl Combiner {
         self.combining = true;
         Ok(true)
     }
+    /// Disable combining.
+    pub fn disable_combining(&mut self) -> io::Result<()> {
+        if self.keyboard_enhancement_flags_pushed {
+            pop_keyboard_enhancement_flags()?;
+            self.keyboard_enhancement_flags_pushed = false;
+        }
+        self.combining = false;
+        Ok(())
+    }
     pub fn is_combining(&self) -> bool {
         self.combining
+    }
+    /// When combining is enabled, you may either want "simple" keys
+    /// (i.e. without modifier or space) to be handled on key press,
+    /// or to wait for a key release so that maybe they may
+    /// be part of a combination like 'a-b'.
+    /// If combinations without modifier or space are unlikely in your application, you
+    /// may make it feel snappier by setting this to true.
+    ///
+    /// This setting has no effect when combining isn't enabled.
+    pub fn set_mandate_modifier_for_multiple_keys(&mut self, mandate: bool) {
+        self.mandate_modifier_for_multiple_keys = mandate;
     }
     /// Take all the down_keys, combine them into a KeyCombination
     fn combine(&mut self, clear: bool) -> Option<KeyCombination> {
@@ -104,9 +137,15 @@ impl Combiner {
         match key.kind {
             KeyEventKind::Press => {
                 self.down_keys.push(key);
-                if self.down_keys.len() == MAX_PRESS_COUNT {
-                    // As we can't handle more than 3 keys, we send them all
-                    // as a combination.
+                if
+                    (
+                        self.mandate_modifier_for_multiple_keys
+                        && is_key_simple(key)
+                        && !self.shift_pressed
+                        && self.down_keys.len() == 1
+                    )
+                    || self.down_keys.len() == MAX_PRESS_COUNT
+                {
                     self.combine(true)
                 } else {
                     None
@@ -133,6 +172,13 @@ impl Combiner {
             }
         }
     }
+}
+
+/// For the purpose of key combination, we consider that a key is "simple"
+/// when it's neither a modifier (ctrl,alt,shift) nor a space.
+pub fn is_key_simple(key: KeyEvent) -> bool {
+    key.modifiers.is_empty()
+        && key.code != KeyCode::Char(' ')
 }
 
 impl Drop for Combiner {

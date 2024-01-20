@@ -31,7 +31,7 @@ It can be parsed, ergonomically built with the `key!` macro, obtained from key e
 
 With a `Combiner`, you can change raw Crossterm key events into key combinations.
 
-When the terminal is modern enough and supports the Kitty protocol, complex combinations with up to three non-modifier keys may be formed, for example `Ctrl-Alt-Shift-g-y` or `i-u`.
+When the terminal is modern enough and supports the Kitty protocol, complex combinations with up to three non-modifier keys may be formed, for example `Ctrl-Alt-Shift-g-y` or `Space-i-u`.
 
 For standard ANSI terminals, only regular combinations are available, like `Shift-o`, `Ctrl-Alt-Shift-g` or `i`.
 
