@@ -125,10 +125,8 @@ impl Combiner {
     }
     fn transform_combining(&mut self, key: KeyEvent) -> Option<KeyCombination> {
         if let KeyCode::Modifier(modifier) = key.code {
-            if key.kind == KeyEventKind::Press
-                && (modifier == ModifierKeyCode::LeftShift || modifier == ModifierKeyCode::RightShift)
-            {
-                self.shift_pressed = true;
+            if modifier == ModifierKeyCode::LeftShift || modifier == ModifierKeyCode::RightShift {
+                self.shift_pressed = key.kind != KeyEventKind::Release;
             }
             // we ignore modifier keys as independent events
             // (which means we never return a combination with only modifiers)
