@@ -2,7 +2,7 @@
 use {
     crokey::*,
     crossterm::{
-        event::{read, Event, KeyEventKind},
+        event::{read, Event},
         style::Stylize,
         terminal,
     },
