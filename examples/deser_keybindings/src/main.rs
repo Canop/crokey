@@ -29,7 +29,7 @@ alt-j = "jaguar"
 h = "hexapode"
 shift-h = "HEXAPODE"
 - = "mandrill"
-alt-- = "nasalis"
+alt-- = "nasalis" # some terminals don't distinguish between - and alt--
 "#;
 
 pub fn main() {

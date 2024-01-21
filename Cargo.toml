@@ -26,7 +26,12 @@ deser-hjson = "1.0"
 trybuild = "1.0.55"
 
 [workspace]
-members = ["src/proc_macros", "examples/deser_keybindings", "examples/print_key"]
+members = [
+    "src/proc_macros",
+    "examples/deser_keybindings",
+    "examples/print_key",
+    "examples/print_key_no_combiner",
+]
 
 [patch.crates-io]
 # strict = { path = "../strict" }

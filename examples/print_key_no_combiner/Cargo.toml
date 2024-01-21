@@ -1,9 +1,9 @@
 [package]
-name = "print_key"
+name = "print_key_no_combiner"
 version = "0.5.0"
 authors = ["dystroy <denys.seguret@gmail.com>"]
 edition = "2021"
-description = "An example of using crokey to recognize and print key combinations"
+description = "An example of using crokey to print the keys the user types"
 license = "MIT"
 readme = "README.md"
 
