@@ -183,6 +183,3 @@ uses TOML and demonstrates how to have `KeyEvent` keys in the map instead of `Cr
 
 Crokey includes and reexports Crossterm, so you don't have to import it and to avoid conflicts.
 
-
-[about Crossterm 0.25](https://github.com/Canop/crokey/issues/16)
-
