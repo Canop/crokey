@@ -132,29 +132,40 @@ impl Combiner {
             // (which means we never return a combination with only modifiers)
             return None;
         }
-        match key.kind {
-            KeyEventKind::Press => {
-                self.down_keys.push(key);
-                if
-                    (
-                        self.mandate_modifier_for_multiple_keys
-                        && is_key_simple(key)
-                        && !self.shift_pressed
-                        && self.down_keys.len() == 1
-                    )
-                    || self.down_keys.len() == MAX_PRESS_COUNT
-                {
+        if
+                self.mandate_modifier_for_multiple_keys
+                && is_key_simple(key)
+                && !self.shift_pressed
+                && self.down_keys.is_empty()
+        {
+            // "simple key" are handled differently: they're returned on press and repeat
+            match key.kind {
+                KeyEventKind::Press | KeyEventKind::Repeat => {
+                    self.down_keys.push(key);
                     self.combine(true)
-                } else {
+                }
+                KeyEventKind::Release => {
                     None
                 }
             }
-            KeyEventKind::Release => {
-                // this release ends the combination in progress
-                self.combine(true)
-            }
-            KeyEventKind::Repeat => {
-                self.combine(false)
+        } else {
+            // not a single simple key
+            match key.kind {
+                KeyEventKind::Press => {
+                    self.down_keys.push(key);
+                    if self.down_keys.len() == MAX_PRESS_COUNT {
+                        self.combine(true)
+                    } else {
+                        None
+                    }
+                }
+                KeyEventKind::Release => {
+                    // this release ends the combination in progress
+                    self.combine(true)
+                }
+                KeyEventKind::Repeat => {
+                    self.combine(false)
+                }
             }
         }
     }
