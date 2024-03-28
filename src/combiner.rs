@@ -32,6 +32,7 @@ const MAX_PRESS_COUNT: usize = 3;
 pub struct Combiner {
     combining: bool,
     keyboard_enhancement_flags_pushed: bool,
+    keyboard_enhancement_flags_externally_managed: bool,
     mandate_modifier_for_multiple_keys: bool,
     down_keys: Vec<KeyEvent>,
     shift_pressed: bool,
@@ -42,6 +43,7 @@ impl Default for Combiner {
         Self {
             combining: false,
             keyboard_enhancement_flags_pushed: false,
+            keyboard_enhancement_flags_externally_managed: false,
             mandate_modifier_for_multiple_keys: true,
             down_keys: Vec::new(),
             shift_pressed: false,
@@ -63,25 +65,35 @@ impl Combiner {
         if self.combining {
             return Ok(true);
         }
-        if self.keyboard_enhancement_flags_pushed {
-            return Ok(self.combining);
+        if !self.keyboard_enhancement_flags_externally_managed {
+            if self.keyboard_enhancement_flags_pushed {
+                return Ok(self.combining);
+            }
+            if !terminal::supports_keyboard_enhancement()? {
+                return Ok(false);
+            }
+            push_keyboard_enhancement_flags()?;
+            self.keyboard_enhancement_flags_pushed = true;
         }
-        if !terminal::supports_keyboard_enhancement()? {
-            return Ok(false);
-        }
-        push_keyboard_enhancement_flags()?;
-        self.keyboard_enhancement_flags_pushed = true;
         self.combining = true;
         Ok(true)
     }
     /// Disable combining.
     pub fn disable_combining(&mut self) -> io::Result<()> {
-        if self.keyboard_enhancement_flags_pushed {
-            pop_keyboard_enhancement_flags()?;
-            self.keyboard_enhancement_flags_pushed = false;
+        if !self.keyboard_enhancement_flags_externally_managed {
+            if self.keyboard_enhancement_flags_pushed {
+                pop_keyboard_enhancement_flags()?;
+                self.keyboard_enhancement_flags_pushed = false;
+            }
         }
         self.combining = false;
         Ok(())
+    }
+    /// Tell the Combiner not to push/pop the keyboard enhancement flags.
+    /// Call before enable_combining if you want to manage the flags yourself.
+    /// (for example: if you need to use stderr instead of stdout in crossterm::execute!)
+    pub fn set_keyboard_enhancement_flags_externally_managed(&mut self) {
+        self.keyboard_enhancement_flags_externally_managed = true;
     }
     pub fn is_combining(&self) -> bool {
         self.combining
