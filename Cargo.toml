@@ -1,6 +1,6 @@
 [package]
 name = "crokey"
-version = "0.6.3"
+version = "0.6.4"
 authors = ["dystroy <denys.seguret@gmail.com>"]
 edition = "2021"
 keywords = ["key", "parse"]
@@ -16,7 +16,7 @@ default = ["serde"]
 
 [dependencies]
 crossterm = "0.27"
-crokey-proc_macros = { path = "src/proc_macros", version = "0.6.3" }
+crokey-proc_macros = { path = "src/proc_macros", version = "0.6.4" }
 once_cell = "1.12"
 serde = { optional = true, version = "1.0.130", features = ["derive"] }
 strict = "0.2"
