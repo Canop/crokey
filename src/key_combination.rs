@@ -1,3 +1,4 @@
+use serde::{Serialize, Serializer};
 use {
     super::*,
     crossterm::event::{KeyEvent, KeyEventKind, KeyEventState},
@@ -95,6 +96,13 @@ impl<'de> Deserialize<'de> for KeyCombination {
     {
         let s = String::deserialize(deserializer)?;
         FromStr::from_str(&s).map_err(de::Error::custom)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for KeyCombination {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+        serializer.serialize_str(&self.to_string())
     }
 }
 
