@@ -151,9 +151,9 @@ use {
     serde::Deserialize,
     std::collections::HashMap,
 };
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 struct Config {
-    keybindings: HashMap<CroKey, String>,
+    keybindings: HashMap<KeyCombination, String>,
 }
 static CONFIG_HJSON: &str = r#"
 {
@@ -166,18 +166,15 @@ static CONFIG_HJSON: &str = r#"
 }
 "#;
 let config: Config = deser_hjson::from_str(CONFIG_HJSON).unwrap();
-let key_event: KeyEvent = key!(shift-b);
+let key: KeyCombination = key!(shift-b);
 assert_eq!(
-    config.keybindings.get(&key_event.into()).unwrap(),
+    config.keybindings.get(&key).unwrap(),
     "babirussa",
 );
 ```
 
 You can use any Serde compatible format such as JSON or TOML.
 
-The `CroKey` wrapper type may be convenient as it implements `FromStr`,
-`Deserialize`, and `Display`, but its use is optional. The "deser_keybindings" example
-uses TOML and demonstrates how to have `KeyEvent` keys in the map instead of `Crokey`.
 
 ## Crossterm Compatibility
 
