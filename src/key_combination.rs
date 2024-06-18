@@ -1,10 +1,24 @@
-use serde::{Serialize, Serializer};
 use {
     super::*,
-    crossterm::event::{KeyEvent, KeyEventKind, KeyEventState},
-    serde::{de, Deserialize, Deserializer},
-    std::{fmt, str::FromStr},
+    crossterm::event::{
+        KeyEvent,
+        KeyEventKind,
+        KeyEventState,
+    },
+    std::{
+        fmt,
+        str::FromStr,
+    },
     strict::OneToThree,
+};
+
+#[cfg(feature = "serde")]
+use serde::{
+    de,
+    Deserialize,
+    Deserializer,
+    Serialize,
+    Serializer,
 };
 
 /// A Key combination wraps from one to three standard keys with optional modifiers
@@ -101,7 +115,10 @@ impl<'de> Deserialize<'de> for KeyCombination {
 
 #[cfg(feature = "serde")]
 impl Serialize for KeyCombination {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         serializer.serialize_str(&self.to_string())
     }
 }
