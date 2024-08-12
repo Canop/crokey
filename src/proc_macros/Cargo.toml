@@ -1,13 +1,13 @@
 [package]
 name = "crokey-proc_macros"
-version = "1.0.1"
+version = "1.1.0"
 authors = ["Canop <cano.petrole@gmail.com>"]
 description = "proc macros for the crokey crate"
 license = "MIT"
 edition = "2018"
 
 [dependencies]
-crossterm = "0.27"
+crossterm = "0.28"
 proc-macro2 = "1.0"
 quote = "1.0"
 strict = "0.2"
