@@ -129,7 +129,7 @@ pub struct FormattedKeyCombination<'s> {
     key: KeyCombination,
 }
 
-impl<'s> fmt::Display for FormattedKeyCombination<'s> {
+impl fmt::Display for FormattedKeyCombination<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let format = &self.format;
         let key = &self.key;
