@@ -93,6 +93,10 @@ impl KeyCombinationFormat {
         self.control = s.into();
         self
     }
+    pub fn with_command<S: Into<String>>(mut self, s: S) -> Self {
+        self.command = s.into();
+        self
+    }
     pub fn with_alt<S: Into<String>>(mut self, s: S) -> Self {
         self.alt = s.into();
         self
