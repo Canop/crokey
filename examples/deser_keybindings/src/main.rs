@@ -24,6 +24,7 @@ static CONFIG_TOML: &str = r#"
 [keybindings]
 a = "aardvark"
 shift-b = "babirussa"
+cmd-b = "badger"
 ctrl-k = "koala"
 alt-j = "jaguar"
 h = "hexapode"

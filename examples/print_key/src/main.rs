@@ -37,6 +37,10 @@ pub fn main() {
                         println!("You typed {} which gracefully quits", key.green());
                         break;
                     }
+                    key!(cmd-e) => { // not using cmd-q because your terminal intercepts it
+                        println!("You typed {} which quits on Mac", key.green());
+                        break;
+                    }
                     key!('?') | key!(shift-'?') => {
                         println!("{}", "There's no help on this app".red());
                     }

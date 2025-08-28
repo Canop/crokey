@@ -13,6 +13,7 @@ use {
 struct KeyCombinationKey {
     pub crate_path: TokenStream,
     pub ctrl: bool,
+    pub cmd: bool,
     pub alt: bool,
     pub shift: bool,
     pub codes: OneToThree<TokenStream>,
@@ -142,6 +143,7 @@ impl Parse for KeyCombinationKey {
         let crate_path = input.parse::<Group>()?.stream();
 
         let mut ctrl = false;
+        let mut cmd = false;
         let mut alt = false;
         let mut shift = false;
 
@@ -170,6 +172,7 @@ impl Parse for KeyCombinationKey {
             let ident_value = ident.to_string().to_lowercase();
             let modifier = match &*ident_value {
                 "ctrl" => &mut ctrl,
+                "cmd" => &mut cmd,
                 "alt" => &mut alt,
                 "shift" => &mut shift,
                 _ => break (ident_value, ident.span()),
@@ -212,6 +215,7 @@ impl Parse for KeyCombinationKey {
         Ok(KeyCombinationKey {
             crate_path,
             ctrl,
+            cmd,
             alt,
             shift,
             codes,
@@ -226,6 +230,7 @@ pub fn key(input: TokenStream1) -> TokenStream1 {
     let KeyCombinationKey {
         crate_path,
         ctrl,
+        cmd,
         alt,
         shift,
         codes,
@@ -234,6 +239,9 @@ pub fn key(input: TokenStream1) -> TokenStream1 {
     let mut modifier_constant = "MODS".to_owned();
     if ctrl {
         modifier_constant.push_str("_CTRL");
+    }
+    if cmd {
+        modifier_constant.push_str("_CMD");
     }
     if alt {
         modifier_constant.push_str("_ALT");

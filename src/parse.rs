@@ -109,6 +109,9 @@ pub fn parse(raw: &str) -> Result<KeyCombination, ParseKeyError> {
         if let Some(end) = raw.strip_prefix("ctrl-") {
             raw = end;
             modifiers.insert(KeyModifiers::CONTROL);
+        } else if let Some(end) = raw.strip_prefix("cmd-") {
+            raw = end;
+            modifiers.insert(KeyModifiers::SUPER);
         } else if let Some(end) = raw.strip_prefix("alt-") {
             raw = end;
             modifiers.insert(KeyModifiers::ALT);

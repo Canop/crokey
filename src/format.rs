@@ -60,6 +60,7 @@ use {
 #[derive(Debug, Clone)]
 pub struct KeyCombinationFormat {
     pub control: String,
+    pub command: String, // also called 'super', 'apple', 'windows'
     pub alt: String,
     pub shift: String,
     pub enter: String,
@@ -71,6 +72,7 @@ impl Default for KeyCombinationFormat {
     fn default() -> Self {
         Self {
             control: "Ctrl-".to_string(),
+            command: "Cmd-".to_string(),
             alt: "Alt-".to_string(),
             shift: "Shift-".to_string(),
             enter: "Enter".to_string(),
@@ -89,6 +91,10 @@ impl KeyCombinationFormat {
     }
     pub fn with_control<S: Into<String>>(mut self, s: S) -> Self {
         self.control = s.into();
+        self
+    }
+    pub fn with_command<S: Into<String>>(mut self, s: S) -> Self {
+        self.command = s.into();
         self
     }
     pub fn with_alt<S: Into<String>>(mut self, s: S) -> Self {
@@ -113,7 +119,7 @@ impl KeyCombinationFormat {
     /// let s = format!("k={}", k);
     /// assert_eq!(s, "k=F6");
     /// ```
-    pub fn format<K: Into<KeyCombination>>(&self, key: K) -> FormattedKeyCombination {
+    pub fn format<K: Into<KeyCombination>>(&self, key: K) -> FormattedKeyCombination<'_> {
         FormattedKeyCombination { format: self, key: key.into() }
     }
     /// return the key formatted into a string
@@ -141,6 +147,9 @@ impl fmt::Display for FormattedKeyCombination<'_> {
         }
         if key.modifiers.contains(KeyModifiers::SHIFT) {
             write!(f, "{}", format.shift)?;
+        }
+        if key.modifiers.contains(KeyModifiers::SUPER) {
+            write!(f, "{}", format.command)?;
         }
         for (i, code) in key.codes.iter().enumerate() {
             if i > 0 {
