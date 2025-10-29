@@ -21,13 +21,13 @@ use {
 };
 
 /// This is the maximum number of keys we can combine.
-/// It can't be changed just here, as the KeyCombination type doesn't support
+/// It can't be changed just here, as the `KeyCombination` type doesn't support
 /// more than 3 non-modifier keys
 const MAX_PRESS_COUNT: usize = 3;
 
 /// Consumes key events and combines them into key combinations.
 ///
-/// See the print_key_events example.
+/// See the `print_key_events` example.
 #[derive(Debug)]
 pub struct Combiner {
     combining: bool,
@@ -89,8 +89,8 @@ impl Combiner {
     }
     /// Tell the Combiner not to push/pop the keyboard enhancement flags.
     ///
-    /// Call before enable_combining if you want to manage the flags yourself.
-    /// (for example: if you need to use stderr instead of stdout in crossterm::execute!)
+    /// Call before `enable_combining` if you want to manage the flags yourself.
+    /// (for example: if you need to use stderr instead of stdout in `crossterm::execute!`)
     pub fn set_keyboard_enhancement_flags_externally_managed(&mut self) {
         self.keyboard_enhancement_flags_externally_managed = true;
     }
@@ -108,7 +108,7 @@ impl Combiner {
     pub fn set_mandate_modifier_for_multiple_keys(&mut self, mandate: bool) {
         self.mandate_modifier_for_multiple_keys = mandate;
     }
-    /// Take all the down_keys, combine them into a KeyCombination
+    /// Take all the `down_keys`, combine them into a `KeyCombination`
     fn combine(&mut self, clear: bool) -> Option<KeyCombination> {
         let mut key_combination = KeyCombination::try_from(self.down_keys.as_slice())
             .ok(); // it may be empty, in which case we return None
@@ -210,7 +210,7 @@ impl Drop for Combiner {
 }
 
 /// Change the state of the terminal to enable combining keys.
-/// This is done automatically by Combiner::enable_combining
+/// This is done automatically by `Combiner::enable_combining`
 /// so you should usually not need to call this function.
 pub fn push_keyboard_enhancement_flags() -> io::Result<()> {
     let mut stdout = io::stdout();

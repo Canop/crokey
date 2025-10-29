@@ -31,9 +31,9 @@ pub struct KeyCombination {
 
 /// Change the char to uppercase when the modifier shift is present,
 /// otherwise if the char is uppercase, return true.
-/// If the key is the `\r' or '\n' char, change it to KeyCode::Enter.
+/// If the key is the '\r' or '\n' char, change it to `KeyCode::Enter`.
 fn normalize_key_code(code: &mut KeyCode, modifiers: KeyModifiers) -> bool {
-    if matches!(code, KeyCode::Char('\r') | KeyCode::Char('\n')) {
+    if matches!(code, KeyCode::Char('\r' | '\n')) {
         *code = KeyCode::Enter;
     } else if modifiers.contains(KeyModifiers::SHIFT) {
         if let KeyCode::Char(c) = code {
@@ -50,12 +50,12 @@ fn normalize_key_code(code: &mut KeyCode, modifiers: KeyModifiers) -> bool {
 }
 
 impl KeyCombination {
-    /// Create a new KeyCombination from one to three keycodes and a set of modifiers
+    /// Create a new `KeyCombination` from one to three keycodes and a set of modifiers
     pub fn new<C: Into<OneToThree<KeyCode>>>(codes: C, modifiers: KeyModifiers) -> Self {
         let codes = codes.into().sorted();
         Self { codes, modifiers }
     }
-    /// Create a new KeyCombination from one keycode and a set of modifiers
+    /// Create a new `KeyCombination` from one keycode and a set of modifiers
     pub const fn one_key(code: KeyCode, modifiers: KeyModifiers) -> Self {
         let codes = OneToThree::One(code);
         Self { codes, modifiers }
@@ -74,7 +74,7 @@ impl KeyCombination {
     /// Fix the case of the code to uppercase if the shift modifier is present.
     /// Add the SHIFT modifier if one code is uppercase.
     ///
-    /// This allows direct comparisons with the fields of crossterm::event::KeyEvent
+    /// This allows direct comparisons with the fields of `crossterm::event::KeyEvent`
     /// whose code is uppercase when the shift modifier is present. And supports the
     /// case where the modifier isn't mentionned but the key is uppercase.
     pub fn normalized(mut self) -> Self {
@@ -148,7 +148,7 @@ impl From<KeyEvent> for KeyCombination {
 
 impl TryFrom<&[KeyEvent]> for KeyCombination {
     type Error = &'static str;
-    /// Try to create a KeyCombination from a slice of key events,
+    /// Try to create a `KeyCombination` from a slice of key events,
     /// will fail if and only if the slice is empty.
     fn try_from(key_events: &[KeyEvent]) -> Result<Self, Self::Error> {
         let mut modifiers = KeyModifiers::empty();

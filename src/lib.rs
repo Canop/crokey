@@ -5,7 +5,7 @@
 //! - parsing key combinations at compile time
 //! - combining Crossterm key events in key combinations
 //!
-//! ## The KeyCombination
+//! ## The `KeyCombination`
 //!
 //! A `KeyCombination` is made of 1 to 3 "normal" keys with some optional modifiers (alt, shift, ctrl).
 //!
@@ -188,13 +188,13 @@ use {
     once_cell::sync::Lazy,
 };
 
-/// A lazy initialized KeyCombinationFormat which can be considered as standard
-/// and which is used in the Display implementation of the [KeyCombination] type.
+/// A lazy initialized `KeyCombinationFormat` which can be considered as standard
+/// and which is used in the Display implementation of the [`KeyCombination`] type.
 pub static STANDARD_FORMAT: Lazy<KeyCombinationFormat> = Lazy::new(KeyCombinationFormat::default);
 
 
 /// check and expand at compile-time the provided expression
-/// into a valid KeyCombination.
+/// into a valid `KeyCombination`.
 ///
 ///
 /// For example:
@@ -234,12 +234,18 @@ pub mod __private {
     use crossterm::event::KeyModifiers;
     pub const MODS: KeyModifiers = KeyModifiers::NONE;
     pub const MODS_CTRL: KeyModifiers = KeyModifiers::CONTROL;
+    pub const MODS_CMD: KeyModifiers = KeyModifiers::SUPER;
     pub const MODS_ALT: KeyModifiers = KeyModifiers::ALT;
     pub const MODS_SHIFT: KeyModifiers = KeyModifiers::SHIFT;
     pub const MODS_CTRL_ALT: KeyModifiers = KeyModifiers::CONTROL.union(KeyModifiers::ALT);
+    pub const MODS_CMD_ALT: KeyModifiers = KeyModifiers::SUPER.union(KeyModifiers::ALT);
     pub const MODS_ALT_SHIFT: KeyModifiers = KeyModifiers::ALT.union(KeyModifiers::SHIFT);
     pub const MODS_CTRL_SHIFT: KeyModifiers = KeyModifiers::CONTROL.union(KeyModifiers::SHIFT);
+    pub const MODS_CMD_SHIFT: KeyModifiers = KeyModifiers::SUPER.union(KeyModifiers::SHIFT);
     pub const MODS_CTRL_ALT_SHIFT: KeyModifiers = KeyModifiers::CONTROL
+        .union(KeyModifiers::ALT)
+        .union(KeyModifiers::SHIFT);
+    pub const MODS_CMD_ALT_SHIFT: KeyModifiers = KeyModifiers::SUPER
         .union(KeyModifiers::ALT)
         .union(KeyModifiers::SHIFT);
 }
@@ -259,6 +265,7 @@ mod tests {
         key!(ctrl - alt - f10);
         key!(alt - shift - f10);
         key!(ctrl - shift - f10);
+        key!(cmd - shift - f10);
         key!(ctrl - alt - shift - enter);
     };
 
@@ -332,6 +339,7 @@ mod tests {
         assert_eq!(format.to_string(key!(alt-Space)), "Alt-Space");
         assert_eq!(format.to_string(key!(shift-' ')), "Shift-Space");
         assert_eq!(format.to_string(key!(alt-hyphen)), "Alt-Hyphen");
+        assert_eq!(format.to_string(key!(cmd-f10)), "Cmd-F10");
     }
 
     #[test]
