@@ -16,7 +16,7 @@ default = ["serde"]
 crossterm-event-stream = ["crossterm/event-stream"]
 
 [dependencies]
-crossterm = { version = "0.29", features = ["event-stream"] }
+crossterm = "0.29"
 crokey-proc_macros = { path = "src/proc_macros", version = "1.3.0" }
 once_cell = "1.12"
 serde = { optional = true, version = "1.0.130", features = ["derive"] }
