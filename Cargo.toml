@@ -13,6 +13,7 @@ rust-version = "1.56"
 
 [features]
 default = ["serde"]
+crossterm-event-stream = ["crossterm/event-stream"]
 
 [dependencies]
 crossterm = "0.29"
