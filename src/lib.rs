@@ -253,7 +253,7 @@ pub mod __private {
 #[cfg(test)]
 mod tests {
     use {
-        crate::{key, KeyCombination, OneToThree},
+        crate::{KeyCombination, OneToThree},
         crossterm::event::{KeyCode, KeyModifiers},
     };
 
