@@ -6,6 +6,7 @@ use {
         KeyEventState,
     },
     std::{
+        cmp::Ordering,
         fmt,
         str::FromStr,
     },
@@ -143,6 +144,17 @@ impl From<KeyEvent> for KeyCombination {
             modifiers: key_event.modifiers,
         };
         raw.normalized()
+    }
+}
+
+impl Ord for KeyCombination {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.to_string().cmp(&other.to_string())
+    }
+}
+impl PartialOrd for KeyCombination {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
