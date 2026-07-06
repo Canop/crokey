@@ -144,7 +144,7 @@ assert_eq!(format.to_string(key!(ctrl-c)), "^c");
 
 With the "serde" feature enabled, you can read configuration files in a direct way:
 
-```
+```rust
 use {
     crokey::*,
     crossterm::event::KeyEvent,
