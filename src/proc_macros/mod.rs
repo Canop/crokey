@@ -204,6 +204,14 @@ impl Parse for KeyCombinationKey {
             OneToThree::One(first_code)
         };
 
+        // Crossterm always sends the SHIFT modifier along with BackTab, and
+        // `crokey::parse` forces it in that case too. We do the same here so
+        // that the `key!` macro and the string parser produce identical
+        // combinations (e.g. `key!(backtab) == parse("backtab")`).
+        if codes.iter().any(|code| *code == KeyCode::BackTab) {
+            shift = true;
+        }
+
         // sort according to key codes because comparing with pattern matching
         // received key combinations with parsed ones requires code ordering to
         // be consistent

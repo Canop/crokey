@@ -139,13 +139,20 @@ impl fmt::Display for FormattedKeyCombination<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let format = &self.format;
         let key = &self.key;
+        // A lone BackTab always carries the SHIFT modifier (crossterm reports it
+        // that way, and both `parse` and `key!` normalize to it), so displaying
+        // it as "Shift-BackTab" would be redundant: we render the bare
+        // `shift-backtab` combination as just "BackTab". Any richer combination
+        // involving BackTab (e.g. with Ctrl) keeps its modifiers displayed.
+        let shift_is_implicit = matches!(key.codes, crate::OneToThree::One(BackTab))
+            && key.modifiers == KeyModifiers::SHIFT;
         if key.modifiers.contains(KeyModifiers::CONTROL) {
             write!(f, "{}", format.control)?;
         }
         if key.modifiers.contains(KeyModifiers::ALT) {
             write!(f, "{}", format.alt)?;
         }
-        if key.modifiers.contains(KeyModifiers::SHIFT) {
+        if key.modifiers.contains(KeyModifiers::SHIFT) && !shift_is_implicit {
             write!(f, "{}", format.shift)?;
         }
         if key.modifiers.contains(KeyModifiers::SUPER) {

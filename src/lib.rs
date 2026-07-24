@@ -329,6 +329,14 @@ mod tests {
                 KeyModifiers::NONE,
             )
         );
+        // BackTab always carries SHIFT, like crossterm and `parse` do, so that
+        // `key!(backtab)`, `key!(shift-backtab)` and `parse("backtab")` all agree.
+        assert_eq!(
+            key!(backtab),
+            KeyCombination::new(KeyCode::BackTab, KeyModifiers::SHIFT)
+        );
+        assert_eq!(key!(backtab), key!(shift - backtab));
+        assert_eq!(key!(backtab), crate::parse("backtab").unwrap());
     }
 
     #[test]
@@ -340,6 +348,11 @@ mod tests {
         assert_eq!(format.to_string(key!(shift-' ')), "Shift-Space");
         assert_eq!(format.to_string(key!(alt-hyphen)), "Alt-Hyphen");
         assert_eq!(format.to_string(key!(cmd-f10)), "Cmd-F10");
+        // the implicit SHIFT of a lone backtab isn't displayed
+        assert_eq!(format.to_string(key!(backtab)), "BackTab");
+        assert_eq!(format.to_string(key!(shift - backtab)), "BackTab");
+        // but a richer combination keeps its shift displayed
+        assert_eq!(format.to_string(key!(ctrl - backtab)), "Ctrl-Shift-BackTab");
     }
 
     #[test]
