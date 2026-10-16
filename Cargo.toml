@@ -9,7 +9,7 @@ categories = ["command-line-interface", "parsing"]
 description = "Parse and describe keys - helping incorporate keybindings in terminal applications"
 repository = "https://github.com/Canop/crokey"
 readme = "README.md"
-rust-version = "1.56"
+rust-version = "1.71"
 
 [features]
 default = ["serde"]
